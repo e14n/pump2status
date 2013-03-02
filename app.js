@@ -1,6 +1,6 @@
 // app.js
 //
-// main function for open farm game
+// main function for live updates
 //
 // Copyright 2013, StatusNet Inc.
 //
@@ -35,7 +35,7 @@ var fs = require("fs"),
     Plot = require("./models/plot"),
     Crop = require("./models/crop"),
     CropType = require("./models/croptype"),
-    OpenFarmGame = require("./models/openfarmgame"),
+    PumpLive = require("./models/pumplive"),
     Notifier = require("./lib/notifier"),
     Updater = require("./lib/updater"),
     config,
@@ -44,20 +44,20 @@ var fs = require("fs"),
         address: "localhost",
         hostname: "localhost",
         driver: "disk",
-        name: "Open Farm Game",
-        description: "The social game that brings the excitement of subsistence farming to the social internet."
+        name: "Pump Live",
+        description: "Stats server for the social web."
     },
     log,
     logParams = {
-        name: "openfarmgame",
+        name: "pumplive",
         serializers: {
             req: Logger.stdSerializers.req,
             res: Logger.stdSerializers.res
         }
     };
 
-if (fs.existsSync("/etc/openfarmgame.json")) {
-    config = _.defaults(JSON.parse(fs.readFileSync("/etc/openfarmgame.json")),
+if (fs.existsSync("/etc/pumplive.json")) {
+    config = _.defaults(JSON.parse(fs.readFileSync("/etc/pumplive.json")),
                         defaults);
 } else {
     config = defaults;
@@ -73,11 +73,11 @@ if (config.logfile) {
 
 log = new Logger(logParams);
 
-log.info("Initializing pump.io");
+log.info("Initializing pump live");
 
 if (!config.params) {
     if (config.driver == "disk") {
-        config.params = {dir: "/var/lib/openfarmgame/"};
+        config.params = {dir: "/var/lib/pumplive/"};
     } else {
         config.params = {};
     }
@@ -308,7 +308,7 @@ async.waterfall([
             hostname: config.hostname,
             app: app,
             bank: db,
-            userAgent: "OpenFarmGame/0.1.0"
+            userAgent: "PumpLive/0.1.0"
         });
 
         // Configure this global object
@@ -320,13 +320,13 @@ async.waterfall([
         log.info({name: config.name, 
                   description: config.description, 
                   hostname: config.hostname},
-                 "Initializing OpenFarmGame object");
+                 "Initializing PumpLive object");
 
-        OpenFarmGame.name        = config.name;
-        OpenFarmGame.description = config.description;
-        OpenFarmGame.hostname    = config.hostname;
+        PumpLive.name        = config.name;
+        PumpLive.description = config.description;
+        PumpLive.hostname    = config.hostname;
 
-        OpenFarmGame.protocol = (config.key) ? "https" : "http";
+        PumpLive.protocol = (config.key) ? "https" : "http";
 
         // Let Web stuff get to config
 

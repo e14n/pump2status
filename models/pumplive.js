@@ -1,6 +1,6 @@
-// openfarmgame.js
+// pumplive.js
 //
-// data object representing the game itself
+// data object representing the app itself
 //
 // Copyright 2013, StatusNet Inc.
 //
@@ -16,7 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var OpenFarmGame = {
+var PumpLive = {
 
     name: null,
 
@@ -27,22 +27,22 @@ var OpenFarmGame = {
     protocol: "http",
 
     url: function(rel) {
-        var game = this;
-        return game.protocol + "://" + game.hostname + rel;
+        var app = this;
+        return app.protocol + "://" + app.hostname + rel;
     },
 
     asService: function() {
 
-        var game = this;
+        var app = this;
 
         return {
-            objectType: "service", // XXX: "game"?
-            displayName: game.name,
-            id: game.url("/"),
-            url: game.url("/"),
-            description: game.description
+            objectType: "service", // XXX: "app"?
+            displayName: app.name,
+            id: app.url("/"),
+            url: app.url("/"),
+            description: app.description
         };
     }
 };
 
-module.exports = OpenFarmGame;
+module.exports = PumpLive;
