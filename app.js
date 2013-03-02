@@ -284,19 +284,6 @@ async.waterfall([
         app.post('/logout', userAuth, userRequired, routes.handleLogout);
         app.get('/about', userAuth, userOptional, routes.about);
         app.get('/authorized/:hostname', routes.authorized);
-        app.get('/user/:webfinger', userAuth, userOptional, routes.user);
-        app.get('/plot/:plot', userAuth, userOptional, reqPlot, routes.plot);
-        app.get('/crop/:crop', userAuth, userOptional, reqCrop, routes.crop);
-        app.get('/plot/:plot/plant', userAuth, userRequired, reqPlot, userIsOwner, routes.plant);
-        app.post('/plot/:plot/plant', userAuth, userRequired, reqPlot, userIsOwner, routes.handlePlant);
-        app.get('/plot/:plot/tearup', userAuth, userRequired, reqPlot, userIsOwner, routes.tearUp);
-        app.post('/plot/:plot/tearup', userAuth, userRequired, reqPlot, userIsOwner, routes.handleTearUp);
-        app.get('/plot/:plot/water', userAuth, userRequired, reqPlot, userIsOwner, routes.water);
-        app.post('/plot/:plot/water', userAuth, userRequired, reqPlot, userIsOwner, routes.handleWater);
-        app.get('/plot/:plot/harvest', userAuth, userRequired, reqPlot, userIsOwner, routes.harvest);
-        app.post('/plot/:plot/harvest', userAuth, userRequired, reqPlot, userIsOwner, routes.handleHarvest);
-        app.get('/buy-plot', userAuth, userRequired, routes.buyPlot);
-        app.post('/buy-plot', userAuth, userRequired, routes.handleBuyPlot);
         app.get('/.well-known/host-meta.json', routes.hostmeta);
 
         // Create a dialback client
