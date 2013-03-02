@@ -1,0 +1,16 @@
+<h1><%- farmer.name %> <small>(<%- farmer.id %>)</small></h1>
+
+<p><img src="/images/coin.svg" height="30" width="30"> <%- farmer.coins %> coins</p>
+
+<h3>Plots</h3>
+
+<ul class="thumbnails">
+  <% _.each(plots, function(plot) {
+     var crop = (plot.crop) ? crops[plot.crop] : null; %>
+  <%= partial("plot", {plot: plot, crop: crop}) %>
+  <% }); %>
+</ul>
+
+<% if (user && user.id == farmer.id) { %>
+<p><a class="btn btn-primary" rel="tooltip" title="requires 50 coins" href="/buy-plot"<% if (farmer.coins < 50) { %> disabled="disabled" onclick="return false;"<% } %>>Buy a new plot</a></p>
+<% } %>

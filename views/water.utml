@@ -1,0 +1,7 @@
+<p>Watering your <%- crop.name %> will cost 1 coin.</p>
+
+<form action="/plot/<%- plot.uuid %>/water" method="post">
+  <input class="btn" type="submit" value="Water" />
+  <a href="/" class="btn btn-primary">Cancel</a>
+</form>
+
