@@ -32,9 +32,6 @@ var fs = require("fs"),
     RequestToken = require("./models/requesttoken"),
     User = require("./models/user"),
     Host = require("./models/host"),
-    Plot = require("./models/plot"),
-    Crop = require("./models/crop"),
-    CropType = require("./models/croptype"),
     PumpLive = require("./models/pumplive"),
     Notifier = require("./lib/notifier"),
     Updater = require("./lib/updater"),
@@ -94,7 +91,7 @@ _.extend(config.params.schema, DatabankStore.schema);
 
 // Now, our stuff
 
-_.each([RequestToken, Host, Plot, Crop], function(Cls) {
+_.each([RequestToken, Host], function(Cls) {
     config.params.schema[Cls.type] = Cls.schema;
 });
 
