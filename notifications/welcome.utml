@@ -1,4 +1,0 @@
-<p>
-  Welcome to <a href="<%- game.url %>"><%- game.displayName %></a>!
-</p>
-
