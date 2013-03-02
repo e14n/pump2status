@@ -30,7 +30,7 @@ var fs = require("fs"),
     DatabankObject = databank.DatabankObject,
     DatabankStore = require('connect-databank')(express),
     RequestToken = require("./models/requesttoken"),
-    Farmer = require("./models/farmer"),
+    User = require("./models/user"),
     Host = require("./models/host"),
     Plot = require("./models/plot"),
     Crop = require("./models/crop"),
@@ -98,10 +98,9 @@ _.each([RequestToken, Host, Plot, Crop], function(Cls) {
     config.params.schema[Cls.type] = Cls.schema;
 });
 
-// Farmer and CropType have global lists
+// User has a global list
 
-_.extend(config.params.schema, Farmer.schema);
-_.extend(config.params.schema, CropType.schema);
+_.extend(config.params.schema, User.schema);
 
 var db = Databank.get(config.driver, config.params);
 
@@ -196,15 +195,15 @@ async.waterfall([
             req.user = null;
             res.local("user", null);
 
-            if (!req.session.farmerID) {
+            if (!req.session.userID) {
                 next();
             } else {
-                Farmer.get(req.session.farmerID, function(err, farmer) {
+                User.get(req.session.userID, function(err, user) {
                     if (err) {
                         next(err);
                     } else {
-                        req.user = farmer;
-                        res.local("user", farmer);
+                        req.user = user;
+                        res.local("user", user);
                         next();
                     }
                 });
@@ -231,11 +230,11 @@ async.waterfall([
             }
         };
 
-        var userIsFarmer = function(req, res, next) {
+        var userIsUser = function(req, res, next) {
             if (req.params.webfinger && req.user.id == req.params.webfinger) {
                 next();
             } else {
-                next(new Error("Must be the same farmer"));
+                next(new Error("Must be the same user"));
             }
         };
 
@@ -285,7 +284,7 @@ async.waterfall([
         app.post('/logout', userAuth, userRequired, routes.handleLogout);
         app.get('/about', userAuth, userOptional, routes.about);
         app.get('/authorized/:hostname', routes.authorized);
-        app.get('/farmer/:webfinger', userAuth, userOptional, routes.farmer);
+        app.get('/user/:webfinger', userAuth, userOptional, routes.user);
         app.get('/plot/:plot', userAuth, userOptional, reqPlot, routes.plot);
         app.get('/crop/:crop', userAuth, userOptional, reqCrop, routes.crop);
         app.get('/plot/:plot/plant', userAuth, userRequired, reqPlot, userIsOwner, routes.plant);
@@ -331,16 +330,6 @@ async.waterfall([
         // Let Web stuff get to config
 
         app.config = config;
-
-        // For sending notifications
-
-        log.info("Initializing notifier");
-
-        var notifier = new Notifier();
-
-        app.notify = function(farmer, title, template, data, callback) {
-            notifier.notify(farmer, title, template, data, callback);
-        };
 
         // For handling errors
 

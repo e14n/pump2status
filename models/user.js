@@ -1,6 +1,6 @@
-// farmer.js
+// user.js
 //
-// data object representing an farmer
+// data object representing an user
 //
 // Copyright 2013, StatusNet Inc.
 //
@@ -20,14 +20,14 @@ var _ = require("underscore"),
     async = require("async"),
     uuid = require("node-uuid"),
     DatabankObject = require("databank").DatabankObject,
-    OpenFarmGame = require("./openfarmgame"),
+    PumpLive = require("./pumplive"),
     Host = require("./host"),
     Plot = require("./plot");
 
-var Farmer = DatabankObject.subClass("farmer");
+var User = DatabankObject.subClass("user");
 
-Farmer.schema = {
-    "farmer": {
+User.schema = {
+    "user": {
         pkey: "id",
         fields: ["name",
                  "coins",
@@ -39,16 +39,16 @@ Farmer.schema = {
                  "created",
                  "updated"]
     },
-    "farmerlist": {
+    "userlist": {
         pkey: "id"
     }
 };
 
-Farmer.fromPerson = function(person, token, secret, callback) {
+User.fromPerson = function(person, token, secret, callback) {
 
     var id = person.id,
-        farmer,
-        bank = Farmer.bank();
+        user,
+        bank = User.bank();
 
     if (id.substr(0, 5) == "acct:") {
         id = id.substr(5);
@@ -79,7 +79,7 @@ Farmer.fromPerson = function(person, token, secret, callback) {
             Plot.create({owner: id}, callback);
         },
         function(plot, callback) {
-            Farmer.create({id: id,
+            User.create({id: id,
                            name: person.displayName,
                            homepage: person.url,
                            coins: 25,
@@ -96,13 +96,13 @@ Farmer.fromPerson = function(person, token, secret, callback) {
     ], callback);
 };
 
-// Keep a list of existing farmers so we can do periodic updates
+// Keep a list of existing users so we can do periodic updates
 
-Farmer.prototype.afterCreate = function(callback) {
-    var farmer = this,
-        bank = Farmer.bank();
+User.prototype.afterCreate = function(callback) {
+    var user = this,
+        bank = User.bank();
 
-    bank.append("farmerlist", 0, farmer.id, function(err, list) {
+    bank.append("userlist", 0, user.id, function(err, list) {
         if (err) {
             callback(err);
         } else {
@@ -111,19 +111,19 @@ Farmer.prototype.afterCreate = function(callback) {
     });
 };
 
-// Deleted farmers come off the list
+// Deleted users come off the list
 
-Farmer.prototype.afterDel = function(callback) {
-    var farmer = this;
+User.prototype.afterDel = function(callback) {
+    var user = this;
 
     async.parallel([
         function(callback) {
-            var bank = Farmer.bank();
-            bank.remove("farmerlist", 0, farmer.id, callback);
+            var bank = User.bank();
+            bank.remove("userlist", 0, user.id, callback);
         },
         function(callback) {
             var bank = Plot.bank();
-            async.forEach(farmer.plots,
+            async.forEach(user.plots,
                           function(plotID, callback) {
                               bank.del("plot", plotID, callback);
                           },
@@ -138,112 +138,112 @@ Farmer.prototype.afterDel = function(callback) {
     });
 };
 
-Farmer.prototype.joinActivity = function(callback) {
-    var farmer = this,
-        game = OpenFarmGame.asService(),
-        content = "<a href='" + farmer.homepage + "'>" + farmer.name + "</a> " + 
+User.prototype.joinActivity = function(callback) {
+    var user = this,
+        game = PumpLive.asService(),
+        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
             " joined " +
             "<a href='" + game.url + "'>" + game.displayName + "</a>";
 
-    farmer.postActivity({verb: "join",
+    user.postActivity({verb: "join",
                          content: content,
                          object: game},
                         callback);
 };
 
-Farmer.prototype.buyActivity = function(plot, callback) {
-    var farmer = this,
+User.prototype.buyActivity = function(plot, callback) {
+    var user = this,
         obj = plot.asObject(),
-        content = "<a href='" + farmer.homepage + "'>" + farmer.name + "</a> " + 
+        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
             " bought " + 
             "<a href='" + obj.url + "'>a new plot</a>";
 
-    farmer.postActivity({verb: "purchase",
+    user.postActivity({verb: "purchase",
                          content: content,
                          object: obj},
                          callback);
 };
 
-Farmer.prototype.plantActivity = function(crop, callback) {
-    var farmer = this,
+User.prototype.plantActivity = function(crop, callback) {
+    var user = this,
         obj = crop.asObject(),
-        content = "<a href='" + farmer.homepage + "'>" + farmer.name + "</a> " + 
+        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
             " planted " + 
             "<a href='" + obj.url + "'>" + obj.displayName + "</a>";
 
-    farmer.postActivity({verb: "http://openfarmgame.com/schema/verb/plant",
+    user.postActivity({verb: "http://pumplive.com/schema/verb/plant",
                          content: content,
                          object: obj},
                          callback);
 };
 
-Farmer.prototype.tearUpActivity = function(crop, callback) {
-    var farmer = this,
+User.prototype.tearUpActivity = function(crop, callback) {
+    var user = this,
         obj = crop.asObject(),
-        content = "<a href='" + farmer.homepage + "'>" + farmer.name + "</a> " + 
+        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
             " tore up a field of " + 
              obj.displayName;
 
-    farmer.postActivity({verb: "http://openfarmgame.com/schema/verb/tear-up",
+    user.postActivity({verb: "http://pumplive.com/schema/verb/tear-up",
                          content: content,
                          object: obj},
                          callback);
 };
 
-Farmer.prototype.waterActivity = function(crop, callback) {
-    var farmer = this,
+User.prototype.waterActivity = function(crop, callback) {
+    var user = this,
         obj = crop.asObject(),
-        content = "<a href='" + farmer.homepage + "'>" + farmer.name + "</a> " + 
+        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
             " watered " + 
             "<a href='" + obj.url + "'>" + obj.displayName + "</a>";
 
-    farmer.postActivity({verb: "http://openfarmgame.com/schema/verb/water",
+    user.postActivity({verb: "http://pumplive.com/schema/verb/water",
                          content: content,
                          object: obj},
                          callback);
 };
 
-Farmer.prototype.harvestActivity = function(crop, callback) {
-    var farmer = this,
+User.prototype.harvestActivity = function(crop, callback) {
+    var user = this,
         obj = crop.asObject(),
-        content = "<a href='" + farmer.homepage + "'>" + farmer.name + "</a> " + 
+        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
             " harvested " + 
             "<a href='" + obj.url + "'>" + obj.displayName + "</a>";
 
-    farmer.postActivity({verb: "http://openfarmgame.com/schema/verb/harvest",
+    user.postActivity({verb: "http://pumplive.com/schema/verb/harvest",
                          content: content,
                          object: obj},
                          callback);
 };
 
-Farmer.getHostname = function(id) {
+User.getHostname = function(id) {
     var parts = id.split("@"),
         hostname = parts[1].toLowerCase();
 
     return hostname;
 };
 
-Farmer.prototype.getHost = function(callback) {
+User.prototype.getHost = function(callback) {
 
-    var farmer = this,
-        hostname = Farmer.getHostname(farmer.id);
+    var user = this,
+        hostname = User.getHostname(user.id);
 
     Host.get(hostname, callback);
 };
 
-Farmer.prototype.postActivity = function(act, callback) {
+User.prototype.postActivity = function(act, callback) {
 
-    var farmer = this;
+    var user = this;
 
     async.waterfall([
         function(callback) {
-            farmer.getHost(callback);
+            user.getHost(callback);
         },
         function(host, callback) {
             var oa = host.getOAuth(),
                 json = JSON.stringify(act);
 
-            oa.post(farmer.outbox, farmer.token, farmer.secret, json, "application/json", callback);
+            oa.post(user.outbox, user.token, user.secret, json, "application/json", callback);
         },
         function(data, response, callback) {
             var posted;
@@ -265,4 +265,4 @@ Farmer.prototype.postActivity = function(act, callback) {
     ], callback);
 };
 
-module.exports = Farmer;
+module.exports = User;
