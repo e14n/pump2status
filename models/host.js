@@ -22,7 +22,7 @@ var _ = require("underscore"),
     qs = require("querystring"),
     OAuth = require("oauth").OAuth,
     DatabankObject = require("databank").DatabankObject,
-    OpenFarmGame = require("./openfarmgame"),
+    PumpLive = require("./pumplive"),
     RequestToken = require("./requesttoken");
 
 var Host = DatabankObject.subClass("host");
@@ -106,11 +106,11 @@ Host.getCredentials = function(endpoint, callback) {
         function(callback) {
             var body = qs.stringify({type: "client_associate",
                                      application_type: "web",
-                                     application_name: "Open Farm Game",
-                                     redirect_uris: OpenFarmGame.url("/authorized")});
+                                     application_name: "Pump Live",
+                                     redirect_uris: PumpLive.url("/authorized")});
 
             Host.dialbackClient.post(endpoint,
-                                     OpenFarmGame.hostname,
+                                     PumpLive.hostname,
                                      body,
                                      "application/x-www-form-urlencoded",
                                      callback);
@@ -207,10 +207,10 @@ Host.prototype.getOAuth = function() {
                      host.client_id,
                      host.client_secret,
                      "1.0",
-                     OpenFarmGame.url("/authorized/"+host.hostname),
+                     PumpLive.url("/authorized/"+host.hostname),
                      "HMAC-SHA1",
                      null, // nonce size; use default
-                     {"User-Agent": "openfarmgame.com/0.1.0"});
+                     {"User-Agent": "pumplive.com/0.1.0"});
 };
 
 module.exports = Host;
