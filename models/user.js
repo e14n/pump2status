@@ -30,12 +30,11 @@ User.schema = {
     "user": {
         pkey: "id",
         fields: ["name",
-                 "coins",
-                 "plots",
                  "token",
                  "secret",
                  "inbox",
                  "outbox",
+                 "followers",
                  "created",
                  "updated"]
     },
@@ -76,14 +75,9 @@ User.fromPerson = function(person, token, secret, callback) {
 
     async.waterfall([
         function(callback) {
-            Plot.create({owner: id}, callback);
-        },
-        function(plot, callback) {
             User.create({id: id,
                            name: person.displayName,
                            homepage: person.url,
-                           coins: 25,
-                           plots: [plot.uuid],
                            token: token,
                            secret: secret,
                            created: Date.now(),
