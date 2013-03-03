@@ -33,7 +33,6 @@ var fs = require("fs"),
     User = require("./models/user"),
     Host = require("./models/host"),
     PumpLive = require("./models/pumplive"),
-    Notifier = require("./lib/notifier"),
     Updater = require("./lib/updater"),
     config,
     defaults = {
@@ -108,18 +107,6 @@ async.waterfall([
     },
     function(callback) {
 
-        // Set global databank info
-
-        DatabankObject.bank = db;
-
-        // Set initial croptype data
-
-        log.info("Setting initial crop data");
-
-        CropType.initialData(callback);
-    },
-    function(callback) {
-
         var app,
             bounce,
             client,
@@ -139,6 +126,9 @@ async.waterfall([
                 };
             };
 
+        // Set global databank info
+
+        DatabankObject.bank = db;
 
         if (_.has(config, "key")) {
 
@@ -235,42 +225,6 @@ async.waterfall([
             }
         };
 
-        var reqPlot = function(req, res, next) {
-
-            var uuid = req.params.plot;
-
-            Plot.get(uuid, function(err, plot) {
-                if (err) {
-                    next(err);
-                } else {
-                    req.plot = plot;
-                    next();
-                }
-            });
-        };
-
-        var reqCrop = function(req, res, next) {
-
-            var uuid = req.params.crop;
-
-            Crop.get(uuid, function(err, crop) {
-                if (err) {
-                    next(err);
-                } else {
-                    req.crop = crop;
-                    next();
-                }
-            });
-        };
-
-        var userIsOwner = function(req, res, next) {
-            if (req.user.id == req.plot.owner) {
-                next();
-            } else {
-                next(new Error("Must be the owner"));
-            }
-        };
-
         // Routes
 
         log.info("Initializing routes");
@@ -330,7 +284,7 @@ async.waterfall([
 
         log.info("Initializing updater");
 
-        app.updater = new Updater({notifier: notifier, log: log});
+        app.updater = new Updater({log: log});
 
         app.updater.start();
 
