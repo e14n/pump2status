@@ -21,8 +21,7 @@ var _ = require("underscore"),
     uuid = require("node-uuid"),
     DatabankObject = require("databank").DatabankObject,
     PumpLive = require("./pumplive"),
-    Host = require("./host"),
-    Plot = require("./plot");
+    Host = require("./host");
 
 var User = DatabankObject.subClass("user");
 
@@ -130,84 +129,6 @@ User.prototype.afterDel = function(callback) {
             callback(null);
         }
     });
-};
-
-User.prototype.joinActivity = function(callback) {
-    var user = this,
-        game = PumpLive.asService(),
-        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
-            " joined " +
-            "<a href='" + game.url + "'>" + game.displayName + "</a>";
-
-    user.postActivity({verb: "join",
-                         content: content,
-                         object: game},
-                        callback);
-};
-
-User.prototype.buyActivity = function(plot, callback) {
-    var user = this,
-        obj = plot.asObject(),
-        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
-            " bought " + 
-            "<a href='" + obj.url + "'>a new plot</a>";
-
-    user.postActivity({verb: "purchase",
-                         content: content,
-                         object: obj},
-                         callback);
-};
-
-User.prototype.plantActivity = function(crop, callback) {
-    var user = this,
-        obj = crop.asObject(),
-        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
-            " planted " + 
-            "<a href='" + obj.url + "'>" + obj.displayName + "</a>";
-
-    user.postActivity({verb: "http://pumplive.com/schema/verb/plant",
-                         content: content,
-                         object: obj},
-                         callback);
-};
-
-User.prototype.tearUpActivity = function(crop, callback) {
-    var user = this,
-        obj = crop.asObject(),
-        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
-            " tore up a field of " + 
-             obj.displayName;
-
-    user.postActivity({verb: "http://pumplive.com/schema/verb/tear-up",
-                         content: content,
-                         object: obj},
-                         callback);
-};
-
-User.prototype.waterActivity = function(crop, callback) {
-    var user = this,
-        obj = crop.asObject(),
-        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
-            " watered " + 
-            "<a href='" + obj.url + "'>" + obj.displayName + "</a>";
-
-    user.postActivity({verb: "http://pumplive.com/schema/verb/water",
-                         content: content,
-                         object: obj},
-                         callback);
-};
-
-User.prototype.harvestActivity = function(crop, callback) {
-    var user = this,
-        obj = crop.asObject(),
-        content = "<a href='" + user.homepage + "'>" + user.name + "</a> " + 
-            " harvested " + 
-            "<a href='" + obj.url + "'>" + obj.displayName + "</a>";
-
-    user.postActivity({verb: "http://pumplive.com/schema/verb/harvest",
-                         content: content,
-                         object: obj},
-                         callback);
 };
 
 User.getHostname = function(id) {
