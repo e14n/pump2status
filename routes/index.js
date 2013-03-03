@@ -40,27 +40,7 @@ exports.index = function(req, res, next) {
     var plots;
 
     if (req.user) {
-        async.waterfall([
-            function(callback) {
-                Plot.readArray(req.user.plots, callback);
-            },
-            function(results, callback) {
-                var cropIDs;
-                plots = results;
-                cropIDs = _.compact(_.pluck(plots, "crop"));
-                if (cropIDs.length > 0) {
-                    Crop.readAll(cropIDs, callback);
-                } else {
-                    callback(null, []);
-                }
-            }
-        ], function(err, crops) {
-            if (err) {
-                next(err);
-            } else {
-                res.render("user", {title: "Pump Live", user: req.user, user: req.user, plots: plots, crops: crops});
-            }
-        });
+        res.render('userindex', { title: "Pump Live", user: req.user });
     } else {
         res.render('index', { title: "Pump Live" });
     }
@@ -165,26 +145,6 @@ exports.authorized = function(req, res, next) {
         } else {
             req.session.userID = user.id;
             res.redirect("/");
-            if (newUser) {
-                process.nextTick(function() {
-                    async.parallel([
-                        function(callback) {
-                            user.joinActivity(callback);
-                        },
-                        function(callback) {
-                            req.app.notify(user,
-                                           "Welcome to " + PumpLive.name,
-                                           "welcome",
-                                           {user: user},
-                                           callback);
-                        }
-                    ], function(err, results) {
-                        if (err) {
-                            req.app.log(err);
-                        }
-                    });
-                });
-            }
         }
     });
 };
