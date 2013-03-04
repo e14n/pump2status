@@ -34,16 +34,21 @@ var OAUTH_RT = "http://apinamespace.org/oauth/request_token",
     OAUTH_CRED = "registration_endpoint";
 
 Host.schema = {
-    pkey: "hostname",
-    fields: ["client_id",
-             "client_secret",
-             "registration_endpoint",
-             "request_token_endpoint",
-             "access_token_endpoint",
-             "authorization_endpoint",
-             "whoami_endpoint",
-             "created",
-             "updated"]
+    "host": {
+        pkey: "hostname",
+        fields: ["client_id",
+                 "client_secret",
+                 "registration_endpoint",
+                 "request_token_endpoint",
+                 "access_token_endpoint",
+                 "authorization_endpoint",
+                 "whoami_endpoint",
+                 "created",
+                 "updated"]
+    },
+    "hostlist": {
+        pkey: "id"
+    }
 };
 
 Host.ensureHost = function(hostname, callback) {

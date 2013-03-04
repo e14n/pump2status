@@ -32,6 +32,8 @@ var fs = require("fs"),
     RequestToken = require("./models/requesttoken"),
     User = require("./models/user"),
     Host = require("./models/host"),
+    HostCount = require("./models/hostcount"),
+    TotalCount = require("./models/totalcount"),
     PumpLive = require("./models/pumplive"),
     Updater = require("./lib/updater"),
     config,
@@ -97,6 +99,9 @@ _.each([RequestToken, Host], function(Cls) {
 // User has a global list
 
 _.extend(config.params.schema, User.schema);
+_.extend(config.params.schema, Host.schema);
+_.extend(config.params.schema, HostCount.schema);
+_.extend(config.params.schema, TotalCount.schema);
 
 var db = Databank.get(config.driver, config.params);
 
