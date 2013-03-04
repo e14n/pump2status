@@ -5,3 +5,16 @@
   <p>It&apos;s the stats server for the social web.</p>
 
 </div>
+
+<div class="row">
+  <div class="span4">
+  <h2>Number of hosts</h2>
+
+  <p><%- hosts %></p>
+  </div>
+  <div class="span4">
+  <h2>Number of users</h2>
+
+  <p><%- users %></p>
+  </div>
+</div>
