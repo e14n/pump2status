@@ -111,7 +111,7 @@ Host.getCredentials = function(endpoint, callback) {
         function(callback) {
             var body = qs.stringify({type: "client_associate",
                                      application_type: "web",
-                                     application_name: "Pump Live",
+                                     application_name: "Pump2Status",
                                      redirect_uris: Pump2Status.url("/authorized")});
 
             Host.dialbackClient.post(endpoint,

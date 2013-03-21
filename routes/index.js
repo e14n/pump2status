@@ -37,39 +37,15 @@ exports.hostmeta = function(req, res) {
 };
 
 exports.index = function(req, res, next) {
-    var hosts, users, bank = Host.bank();
-
-    async.waterfall([
-        function(callback) {
-            bank.read("hostlist", 0, callback);
-        },
-        function(hostlist, callback) {
-            hosts = hostlist.length;
-            bank.read("lasttotalcount", 0, function(err, ltc) {
-                if (err && err.name == "NoSuchThingError") {
-                    users = 0;
-                    callback(null);
-                } else if (err) {
-                    callback(err);
-                } else {
-                    users = ltc.count;
-                    callback(null);
-                }
-            });
-        },
-    ], function(err) {
-        if (err) {
-            next(err);
-        } else if (req.user) {
-            res.render('userindex', { title: "Pump Live", user: req.user, users: users, hosts: hosts });
-        } else {
-            res.render('index', { title: "Pump Live", users: users, hosts: hosts });
-        }
-    });
+    if (req.user) {
+        res.render('userindex', { title: "Pump2Status", user: req.user });
+    } else {
+        res.render('index', { title: "Pump2Status", users: users, hosts: hosts });
+    }
 };
 
 exports.about = function(req, res) {
-    res.render('about', { title: 'About Pump Live' });
+    res.render('about', { title: 'About Pump2Status' });
 };
 
 exports.login = function(req, res) {

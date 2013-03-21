@@ -38,7 +38,7 @@ var fs = require("fs"),
         address: "localhost",
         hostname: "localhost",
         driver: "disk",
-        name: "Pump Live",
+        name: "Pump2Status",
         description: "Stats server for the social web."
     },
     log,

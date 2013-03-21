@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Pump Live</title>
+    <title>Pump2Status</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -44,7 +44,7 @@
       <hr>
 
       <footer>
-        Pump Live is brought to you by <a href="http://e14n.com/">E14N</a>, because we think you&apos;re awesome.
+        Pump2Status is brought to you by <a href="http://e14n.com/">E14N</a>, because we think you&apos;re awesome.
       </footer>
 
     </div> <!-- /container -->
