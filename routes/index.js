@@ -38,7 +38,7 @@ exports.hostmeta = function(req, res) {
 
 exports.index = function(req, res, next) {
     if (req.user) {
-        res.render('userindex', { title: "Pump2Status", user: req.user });
+        res.render('userindex', { title: "Pump2Status", user: req.user, bridged: [] });
     } else {
         res.render('index', { title: "Pump2Status" });
     }
