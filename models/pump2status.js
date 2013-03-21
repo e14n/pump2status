@@ -16,7 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var PumpLive = {
+var Pump2Status = {
 
     name: null,
 
@@ -45,4 +45,4 @@ var PumpLive = {
     }
 };
 
-module.exports = PumpLive;
+module.exports = Pump2Status;

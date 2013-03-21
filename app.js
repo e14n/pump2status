@@ -34,7 +34,7 @@ var fs = require("fs"),
     Host = require("./models/host"),
     HostCount = require("./models/hostcount"),
     TotalCount = require("./models/totalcount"),
-    PumpLive = require("./models/pump2status"),
+    Pump2Status = require("./models/pump2status"),
     Updater = require("./lib/updater"),
     config,
     defaults = {
@@ -250,7 +250,7 @@ async.waterfall([
             hostname: config.hostname,
             app: app,
             bank: db,
-            userAgent: "PumpLive/0.1.0"
+            userAgent: "Pump2Status/0.1.0"
         });
 
         // Configure this global object
@@ -262,13 +262,13 @@ async.waterfall([
         log.info({name: config.name, 
                   description: config.description, 
                   hostname: config.hostname},
-                 "Initializing PumpLive object");
+                 "Initializing Pump2Status object");
 
-        PumpLive.name        = config.name;
-        PumpLive.description = config.description;
-        PumpLive.hostname    = config.hostname;
+        Pump2Status.name        = config.name;
+        Pump2Status.description = config.description;
+        Pump2Status.hostname    = config.hostname;
 
-        PumpLive.protocol = (config.key) ? "https" : "http";
+        Pump2Status.protocol = (config.key) ? "https" : "http";
 
         // Let Web stuff get to config
 

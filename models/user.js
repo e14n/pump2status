@@ -20,7 +20,7 @@ var _ = require("underscore"),
     async = require("async"),
     uuid = require("node-uuid"),
     DatabankObject = require("databank").DatabankObject,
-    PumpLive = require("./pump2status"),
+    Pump2Status = require("./pump2status"),
     Host = require("./host");
 
 var User = DatabankObject.subClass("user");

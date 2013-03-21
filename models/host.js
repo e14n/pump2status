@@ -22,7 +22,7 @@ var _ = require("underscore"),
     qs = require("querystring"),
     OAuth = require("oauth").OAuth,
     DatabankObject = require("databank").DatabankObject,
-    PumpLive = require("./pump2status"),
+    Pump2Status = require("./pump2status"),
     RequestToken = require("./requesttoken");
 
 var Host = DatabankObject.subClass("host");
@@ -112,10 +112,10 @@ Host.getCredentials = function(endpoint, callback) {
             var body = qs.stringify({type: "client_associate",
                                      application_type: "web",
                                      application_name: "Pump Live",
-                                     redirect_uris: PumpLive.url("/authorized")});
+                                     redirect_uris: Pump2Status.url("/authorized")});
 
             Host.dialbackClient.post(endpoint,
-                                     PumpLive.hostname,
+                                     Pump2Status.hostname,
                                      body,
                                      "application/x-www-form-urlencoded",
                                      callback);
@@ -212,7 +212,7 @@ Host.prototype.getOAuth = function() {
                      host.client_id,
                      host.client_secret,
                      "1.0",
-                     PumpLive.url("/authorized/"+host.hostname),
+                     Pump2Status.url("/authorized/"+host.hostname),
                      "HMAC-SHA1",
                      null, // nonce size; use default
                      {"User-Agent": "pump2status.com/0.1.0"});
