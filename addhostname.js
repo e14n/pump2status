@@ -43,7 +43,7 @@ var fs = require("fs"),
     },
     log,
     logParams = {
-        name: "pumplive",
+        name: "pump2status",
         component: "addhostname",
         serializers: {
             req: Logger.stdSerializers.req,
@@ -59,8 +59,8 @@ if (process.argv.length < 3) {
 
 hostname = process.argv[2];
 
-if (fs.existsSync("/etc/pumplive.json")) {
-    config = _.defaults(JSON.parse(fs.readFileSync("/etc/pumplive.json")),
+if (fs.existsSync("/etc/pump2status.json")) {
+    config = _.defaults(JSON.parse(fs.readFileSync("/etc/pump2status.json")),
                         defaults);
 } else {
     config = defaults;
@@ -80,7 +80,7 @@ log.info("Initializing addhostname.js");
 
 if (!config.params) {
     if (config.driver == "disk") {
-        config.params = {dir: "/var/lib/pumplive/"};
+        config.params = {dir: "/var/lib/pump2status/"};
     } else {
         config.params = {};
     }

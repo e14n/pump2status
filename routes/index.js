@@ -23,7 +23,7 @@ var wf = require("webfinger"),
     User = require("../models/user"),
     Host = require("../models/host"),
     RequestToken = require("../models/requesttoken"),
-    PumpLive = require("../models/pumplive");
+    PumpLive = require("../models/pump2status");
 
 exports.hostmeta = function(req, res) {
     res.json({

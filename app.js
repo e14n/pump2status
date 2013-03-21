@@ -34,7 +34,7 @@ var fs = require("fs"),
     Host = require("./models/host"),
     HostCount = require("./models/hostcount"),
     TotalCount = require("./models/totalcount"),
-    PumpLive = require("./models/pumplive"),
+    PumpLive = require("./models/pump2status"),
     Updater = require("./lib/updater"),
     config,
     defaults = {
@@ -47,15 +47,15 @@ var fs = require("fs"),
     },
     log,
     logParams = {
-        name: "pumplive",
+        name: "pump2status",
         serializers: {
             req: Logger.stdSerializers.req,
             res: Logger.stdSerializers.res
         }
     };
 
-if (fs.existsSync("/etc/pumplive.json")) {
-    config = _.defaults(JSON.parse(fs.readFileSync("/etc/pumplive.json")),
+if (fs.existsSync("/etc/pump2status.json")) {
+    config = _.defaults(JSON.parse(fs.readFileSync("/etc/pump2status.json")),
                         defaults);
 } else {
     config = defaults;
@@ -75,7 +75,7 @@ log.info("Initializing pump live");
 
 if (!config.params) {
     if (config.driver == "disk") {
-        config.params = {dir: "/var/lib/pumplive/"};
+        config.params = {dir: "/var/lib/pump2status/"};
     } else {
         config.params = {};
     }

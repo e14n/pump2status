@@ -1,4 +1,4 @@
-// pumplive.js
+// pump2status.js
 //
 // data object representing the app itself
 //
