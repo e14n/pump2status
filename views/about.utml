@@ -1,6 +1,8 @@
-<p><b>Pump2Status</b> is a stats server for the social web. It collects
-data about hosts and users from several sources and keeps historical
-track of important numbers and figures and so on.</p>
+<p><b>Pump2Status</b> is a bridge to StatusNet sites.</p>
 
+<p>It lets you connect your pump.io account with your StatusNet account, and send your pump.io activities out through StatusNet.</p>
 
+<p>It also lets you find your friends from StatusNet who are already on the pump.io network, and follow them there, too.</p>
+
+<p>Registering on this service lets your friends find you, too.</p>
 
