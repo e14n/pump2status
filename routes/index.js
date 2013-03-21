@@ -40,7 +40,7 @@ exports.index = function(req, res, next) {
     if (req.user) {
         res.render('userindex', { title: "Pump2Status", user: req.user });
     } else {
-        res.render('index', { title: "Pump2Status", users: users, hosts: hosts });
+        res.render('index', { title: "Pump2Status" });
     }
 };
 

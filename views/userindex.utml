@@ -1,20 +1,9 @@
 <div class="hero-unit">
 
-  <h1>Welcome <%- user.name %>!</h1>
+  <h1>Pump2Status</h1>
 
-  <p>It&apos;s the stats server for the social web.</p>
+  <p>This service lets you connect with your StatusNet friends who are
+  on the pump network. It also lets you share your pump.io updates
+  with those who aren&apos;t.</p>
 
-</div>
-
-<div class="row">
-  <div class="span4">
-  <h2>Number of hosts</h2>
-
-  <p><%- hosts %></p>
-  </div>
-  <div class="span4">
-  <h2>Number of users</h2>
-
-  <p><%- users %></p>
-  </div>
 </div>
