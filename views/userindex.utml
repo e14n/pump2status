@@ -1,9 +1,13 @@
-<div class="hero-unit">
+<h1><%- user.name %> <small><%- user.id %></h1>
 
-  <h1>Pump2Status</h1>
+<p><a href="#" class="btn add-an-account">Connect a StatusNet account</a></p>
 
-  <p>This service lets you connect with your StatusNet friends who are
-  on the pump network. It also lets you share your pump.io updates
-  with those who aren&apos;t.</p>
+<% _.each(bridged, function(account) { %>
+<h2><%- account.name %> <small><%- account.id %></h2>
 
-</div>
+<p><a href="#" class="btn remove-account" data-account-id="<%- account.id %>">Remove account</a></p>
+
+<input type="checkbox" name="autofollow" value="Automatically follow friends from this account if they have a pump.io account, too?"></input>
+<input type="checkbox" name="share" value="Share pump.io updates on this account?"></input>
+
+<% }); %>
