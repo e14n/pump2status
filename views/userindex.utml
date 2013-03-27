@@ -1,6 +1,6 @@
 <h1><%- user.name %> <small><%- user.id %></h1>
 
-<p><a href="#" class="btn add-an-account">Connect a StatusNet account</a></p>
+<p><a href="/add-account" class="btn add-account">Connect a StatusNet account</a></p>
 
 <% _.each(bridged, function(account) { %>
 <h2><%- account.name %> <small><%- account.id %></h2>

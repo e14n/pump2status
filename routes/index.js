@@ -22,6 +22,8 @@ var wf = require("webfinger"),
     uuid = require("node-uuid"),
     User = require("../models/user"),
     Host = require("../models/host"),
+    StatusNet = require("../models/statusnet"),
+    StatusNetUser = require("../models/statusnetuser"),
     RequestToken = require("../models/requesttoken"),
     Pump2Status = require("../models/pump2status");
 
@@ -153,4 +155,105 @@ exports.handleLogout = function(req, res) {
     delete req.user;
 
     res.redirect("/", 303);
+};
+
+exports.addAccount = function(req, res) {
+    res.render('add-account', { title: "Add Account" });
+};
+
+exports.handleAddAccount = function(req, res, next) {
+
+    var id = req.body.webfinger,
+        hostname = User.getHostname(id),
+        sn;
+
+    async.waterfall([
+        function(callback) {
+            StatusNet.ensureHost(id, callback);
+        },
+        function(results, callback) {
+	    sn = results;
+            sn.getRequestToken(callback);
+        }
+    ], function(err, rt) {
+        if (err) {
+            if (err instanceof Error) {
+                next(err);
+            } else if (err.data) {
+                next(new Error(err.data));
+            }
+        } else {
+            res.redirect(sn.authorizeURL(rt));
+        }
+    });
+};
+
+exports.authorizedStatusNet = function(req, res, next) {
+
+    var hostname = req.params.hostname,
+        token = req.query.oauth_token,
+        verifier = req.query.oauth_verifier,
+        user = req.user,
+        rt,
+        sn,
+        snuser,
+        access_token,
+        token_secret,
+        id,
+        object,
+        newUser = false;
+
+    async.waterfall([
+        function(callback) {
+            async.parallel([
+                function(callback) {
+                    RequestToken.get(RequestToken.key(hostname, token), callback);
+                },
+                function(callback) {
+                    StatusNet.get(hostname, callback);
+                }
+            ], callback);
+        },
+        function(results, callback) {
+            rt = results[0];
+            sn = results[1];
+            sn.getAccessToken(rt, verifier, callback);
+        },
+        function(token, secret, extra, callback) {
+            access_token = token;
+            token_secret = secret;
+            async.parallel([
+                function(callback) {
+                    rt.del(callback);
+                },
+                function(callback) {
+                    sn.whoami(access_token, token_secret, callback);
+                }
+            ], callback);
+        },
+        function(results, callback) {
+            object = results;
+            StatusNetUser.fromUser(hostname, object, access_token, token_secret, callback);
+        },
+        function(results, callback) {
+            snuser = results;
+            user.associate(snuser, callback);
+        },
+        function(callback) {
+            async.parallel([
+                function(callback) {
+                    snuser.beFound(callback);
+                },
+                function(callback) {
+                    snuser.updateFollowing(callback);
+                }
+            ], callback);
+        }
+    ], function(err, user) {
+        if (err) {
+            next(err);
+        } else {
+            res.redirect("/find-friends/"+snuser.id);
+        }
+    });
 };

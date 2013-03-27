@@ -21,7 +21,8 @@ var _ = require("underscore"),
     uuid = require("node-uuid"),
     DatabankObject = require("databank").DatabankObject,
     Pump2Status = require("./pump2status"),
-    Host = require("./host");
+    Host = require("./host"),
+    Shadow = require("./shadow");
 
 var User = DatabankObject.subClass("user");
 
@@ -178,6 +179,16 @@ User.prototype.postActivity = function(act, callback) {
             }
         }
     ], callback);
+};
+
+User.prototype.associate = function(snuser, callback) {
+    var user = this,
+        shadow = new Shadow({statusnet: snuser.id,
+                             pumpio: user.id});
+
+    // XXX: better error handling if there's already an association
+
+    shadow.create(callback);
 };
 
 module.exports = User;

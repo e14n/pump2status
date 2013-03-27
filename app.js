@@ -241,6 +241,9 @@ async.waterfall([
         app.get('/about', userAuth, userOptional, routes.about);
         app.get('/authorized/:hostname', routes.authorized);
         app.get('/.well-known/host-meta.json', routes.hostmeta);
+        app.get('/add-account', routes.addAccount);
+        app.post('/add-account', routes.handleAddAccount);
+        app.get('/authorized/statusnet/:hostname', userAuth, userRequired, routes.authorizedStatusNet);
 
         // Create a dialback client
 

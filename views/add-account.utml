@@ -1,0 +1,10 @@
+<h1>Connect</h1>
+
+<p>To connect your StatusNet account, enter the Webfinger address in the form below.</p>
+
+<form action="/add-account" method="post">
+  <label>StatusNet ID</label>
+  <input class="span6" id="webfinger" name="webfinger" size="30" type="text" placeholder="you@identi.ca"></input>
+  <span class="help-block">Your StatusNet ID</span>
+  <input type="submit" class="btn btn-primary" value="Connect">
+</form>
