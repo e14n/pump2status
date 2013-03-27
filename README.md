@@ -1,22 +1,29 @@
-# Open Farm Game
+# pump2status
 
-This is a social networking game where you plant some stuff and then
-it grows and then you plant more stuff.
+This is a bridge that lets you find the pump.io accounts of people you
+know on the OStatus network and automatically follow them.
 
-That's about it for the current version. I'd love to make it more
-interesting.
+You can also automatically push your pump.io activities to your
+StatusNet site. So that's good, too.
 
-# File sources
+The canonical site is at https://pump2status.net/ . If you set up your
+own, it will only have data for people who signed up with your server,
+so it's not going to be as useful. But the code's here if you want to
+study it or set up another friend-finder bridge like this.
 
-I mostly just used Google Image search with the public domain filter
-on. I think a lot of them came from other places.
+## License
 
-* dirt.jpg: http://www.public-domain-image.com/full-image/textures-and-patterns-public-domain-images-pictures/dirt-texture.jpg-royalty-free-stock-photograph.html
-* corn.jpg: http://pixabay.com/en/corn-corn-on-the-cob-corn-kernels-61771/
-* beans.jpg: http://en.wikipedia.org/wiki/File:Broad-beans-after-cooking.jpg
-* tomatoes.jpg: http://pixabay.com/en/tomatoes-vegetable-food-red-tasty-2042/
-* strawberries.jpg: http://pixabay.com/en/strawberry-fruits-fruit-51609/
-* wheat.jpg: http://pixabay.com/en/wheat-spike-cereal-grain-field-8844/
-* beets.jpg: http://www.flickr.com/photos/adactio/4701228386/ (small world)
-* pumpkins.jpg: http://www.flickr.com/photos/oatsy40/6299968619/
-* potatoes.jpg: http://pixabay.com/en/potatoes-vegetables-raw-uncooked-3455/
+Copyright 2013, E14N https://e14n.com/
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
