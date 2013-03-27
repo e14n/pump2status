@@ -30,7 +30,12 @@ Edge.schema = {
 
 Edge.beforeCreate = function(props, callback) {
     props.received = Date.now();
+    props.from_to = Edge.key(props.from, props.to);
     callback(null, props);
+};
+
+Edge.key = function(fromId, toId) {
+    return fromId + "→" + toId;
 };
 
 exports.Edge = Edge;

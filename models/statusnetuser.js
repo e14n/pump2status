@@ -37,7 +37,7 @@ StatusNetUser.schema = {
                  "hostname",
                  "token",
                  "secret",
-                 "followers",
+                 "following",
                  "created",
                  "updated"]
     }
@@ -47,10 +47,13 @@ StatusNetUser.fromUser = function(hostname, person, token, secret, callback) {
 
     var snu = new StatusNetUser(person);
 
-    snu.id       = person.screen_name + "@" + hostname;
-    snu.hostname = hostname;
-    snu.token    = token;
-    snu.secret   = secret;
+    snu.id        = person.screen_name + "@" + hostname;
+    snu.hostname  = hostname;
+    snu.token     = token;
+    snu.secret    = secret;
+    // XXX: SSL?
+    // XXX: index.php/ prefix?
+    snu.following = 'http://'+hostname+'/api/statuses/friends/'+person.screen_name+'.json';
 
     snu.save(callback);
 };
@@ -97,6 +100,7 @@ StatusNetUser.prototype.beFound = function(callback) {
         // 
         function(shadows, callback) {
             var ids = _.pluck(shadows, "pumpio");
+            // For each shadow, have it follow the pump.io account
             async.eachLimit(ids,
                             25,
                             function(id, callback) {
@@ -115,6 +119,44 @@ StatusNetUser.prototype.beFound = function(callback) {
 };
 
 StatusNetUser.prototype.updateFollowing = function(callback) {
+    var snu = this,
+        sn,
+        oa;
+
+    async.waterfall([
+        function(callback) {
+            snu.getHost(callback);
+        },
+        function(results, callback) {
+            sn = results;
+            oa = sn.getOAuth();
+            oa.get(snu.following, snu.token, snu.secret, callback);
+        },
+        function(doc, resp, callback) {
+            var following;
+            try {
+                following = JSON.parse(doc);
+            } catch (e) {
+                callback(e);
+                return;
+            };
+            var ids = _.pluck(following, "statusnet_profile_url");
+            // For each shadow, have it follow the pump.io account
+            async.eachLimit(ids,
+                            25,
+                            function(id, callback) {
+                                async.waterfall([
+                                    function(callback) {
+                                        User.get(id, callback);
+                                    },
+                                    function(waiter, callback) {
+                                        waiter.follow(user, callback);
+                                    }
+                                ], callback);
+                            },
+                            callback);
+        }
+    ], callback);
 };
 
 module.exports = StatusNetUser;

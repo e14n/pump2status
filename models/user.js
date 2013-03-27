@@ -22,6 +22,7 @@ var _ = require("underscore"),
     DatabankObject = require("databank").DatabankObject,
     Pump2Status = require("./pump2status"),
     Host = require("./host"),
+    Edge = require("./edge"),
     Shadow = require("./shadow");
 
 var User = DatabankObject.subClass("user");
@@ -191,4 +192,23 @@ User.prototype.associate = function(snuser, callback) {
     shadow.create(callback);
 };
 
-module.exports = User;
+User.prototype.follow = function(other, callback) {
+
+    var user = this;
+
+    async.waterfall([
+        function(callback) {
+            user.postActivity({
+                verb: "follow",
+                object: {
+                    objectType: "person",
+                    id: "acct:" + other.id
+                }
+            }, callback);
+        },
+        function(act, callback) {
+            var edge = new Edge({from: user.id, to: other.id});
+            edge.save(callback);
+        }
+    ], callback);
+};
