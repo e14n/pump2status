@@ -148,7 +148,13 @@ User.prototype.associate = function(snuser, callback) {
     var user = this,
         shadow = new Shadow({statusnet: snuser.id, pumpio: user.id});
 
-    shadow.save(callback);
+    shadow.save(function(err) {
+        if (err) {
+            callback(err);
+        } else {
+            callback(null);
+        }
+    });
 };
 
 User.prototype.follow = function(other, callback) {
