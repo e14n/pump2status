@@ -1,16 +1,32 @@
 <h1>Choose friends to follow</h1>
 
-<ul class="thumbnails">
+<p>These are the pump.io accounts of friends of <%- snuser.id %>.</p>
 
-  <% _.each(found, function(user) { %>
+<form action="/find-friends/<%- snuser.id %>" method="post">
 
-  <li class="span3">
-    <div class="thumbnail">
-      <img src="<%- (user.avatar) ? user.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- user.name %>">
-      <h3><%- user.name %> <small><%- user.id %></small></h3>
-    </div>
-  </li>
+  <label class="checkbox">
+    <input type="checkbox" id="select-all" name="select-all" onClick="if (this.checked) { $('.select').prop('checked', this.checked); }"> Select all
+  </label>
 
-  <% }); %>
+  <ul class="thumbnails">
 
-</ul>
+    <% _.each(found, function(user) { %>
+    <li class="span2">
+      <div class="thumbnail">
+        <input type="checkbox"
+               class="pull-left select"
+               name="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>"
+               id="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>"
+               onClick="$('#select-all').prop('checked', $('#select-all').prop('checked') && this.checked)">
+        <img src="<%- (user.avatar) ? user.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- user.name %>">
+        <p><%- user.name %> <small class="muted"><%- user.id %></small></p>
+      </div>
+    </li>
+
+    <% }); %>
+
+  </ul>
+
+  <input type="submit" class="btn btn-primary" value="Follow"></input>
+
+</form>

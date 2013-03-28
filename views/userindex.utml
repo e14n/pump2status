@@ -1,13 +1,22 @@
 <h1><%- user.name %> <small><%- user.id %></small></h1>
 
-<p><a href="/add-account" class="btn add-account">Connect a StatusNet account</a></p>
+<% if (shadows.length > 0) { %>
 
+<h2>Linked accounts</h2>
+
+<ul class="thumbnails">
 <% _.each(shadows, function(account) { %>
-<h2><%- account.name %> <small><%- account.id %></small></h2>
-
-<p><a href="/remove-account/<%- account.id %>" class="btn remove-account">Remove account</a></p>
-
-<input type="checkbox" name="autofollow" value="Automatically follow friends from this account if they have a pump.io account, too?"></input>
-<input type="checkbox" name="share" value="Share pump.io updates on this account?"></input>
-
+    <li class="span2">
+      <div class="thumbnail">
+        <img src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- account.name %>">
+        <p><%- account.name %> <small class="muted"><%- account.id %></small></p>
+        <p><a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends">Find friends</a></p>
+        <p><a href="/remove-account/<%- account.id %>" class="btn btn-mini remove-account">Remove</a></p>
+      </div>
+    </li>
 <% }); %>
+</ul>
+
+<% } %>
+
+<p><a href="/add-account" class="add-account">Link a StatusNet account</a></p>
