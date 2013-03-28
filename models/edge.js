@@ -29,9 +29,34 @@ Edge.schema = {
 };
 
 Edge.beforeCreate = function(props, callback) {
+
+    if (!props.from || !props.to) {
+        callback(new Error("Need 'from' and 'to' in an edge'"), null);
+        return;
+    }
+
+    props.from_to  = Edge.key(props.from, props.to);
     props.received = Date.now();
-    props.from_to = Edge.key(props.from, props.to);
+
     callback(null, props);
+};
+
+Edge.prototype.beforeSave = function(callback) {
+
+    var edge = this;
+
+    if (!edge.from || !edge.to) {
+        callback(new Error("Need 'from' and 'to' in an edge'"), null);
+        return;
+    }
+
+    edge.from_to = Edge.key(edge.from, edge.to);
+
+    if (!edge.received) {
+        edge.received = Date.now();
+    }
+
+    callback(null);
 };
 
 Edge.key = function(fromId, toId) {
