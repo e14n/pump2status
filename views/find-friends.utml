@@ -6,7 +6,7 @@
 
   <li class="span3">
     <div class="thumbnail">
-      <img src="<%- user.avatar %>" width="96" height="96" alt="<%- user.name %>">
+      <img src="<%- (user.avatar) ? user.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- user.name %>">
       <h3><%- user.name %> <small><%- user.id %></small></h3>
     </div>
   </li>
