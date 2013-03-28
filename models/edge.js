@@ -38,4 +38,4 @@ Edge.key = function(fromId, toId) {
     return fromId + "→" + toId;
 };
 
-exports.Edge = Edge;
+module.exports = Edge;

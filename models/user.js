@@ -144,13 +144,11 @@ User.prototype.postActivity = function(act, callback) {
 };
 
 User.prototype.associate = function(snuser, callback) {
-    var user = this,
-        shadow = new Shadow({statusnet: snuser.id,
-                             pumpio: user.id});
+    var user = this;
 
     // XXX: better error handling if there's already an association
 
-    shadow.create(callback);
+    Shadow.create({statusnet: snuser.id, pumpio: user.id}, callback);
 };
 
 User.prototype.follow = function(other, callback) {

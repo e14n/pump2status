@@ -33,4 +33,4 @@ Shadow.beforeCreate = function(props, callback) {
     callback(null, props);
 };
 
-exports.Shadow = Shadow;
+module.exports = Shadow;

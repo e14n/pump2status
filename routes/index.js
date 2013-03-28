@@ -232,7 +232,7 @@ exports.authorizedStatusNet = function(req, res, next) {
             ], callback);
         },
         function(results, callback) {
-            object = results;
+            object = results[1];
             StatusNetUser.fromUser(object, access_token, token_secret, callback);
         },
         function(results, callback) {

@@ -42,7 +42,11 @@ StatusNetUser.schema = {
 };
 
 StatusNetUser.hostname = function(person) {
-    var parts = urlparse(person.statusnet_profile_url);
+    var parts;
+    if (!_.isString(person.statusnet_profile_url)) {
+        return null;
+    }
+    parts = urlparse(person.statusnet_profile_url);
     if (parts && parts.hostname) {
         return parts.hostname;
     } else {
@@ -132,19 +136,19 @@ StatusNetUser.prototype.beFound = function(callback) {
         function(shadows, callback) {
             var ids = _.pluck(shadows, "pumpio");
             // For each shadow, have it follow the pump.io account
-            async.eachLimit(ids,
-                            25,
-                            function(id, callback) {
-                                async.waterfall([
-                                    function(callback) {
-                                        User.get(id, callback);
-                                    },
-                                    function(waiter, callback) {
-                                        waiter.follow(user, callback);
-                                    }
-                                ], callback);
-                            },
-                            callback);
+            async.forEachLimit(ids,
+                               25,
+                               function(id, callback) {
+                                   async.waterfall([
+                                       function(callback) {
+                                           User.get(id, callback);
+                                       },
+                                       function(waiter, callback) {
+                                           waiter.follow(user, callback);
+                                       }
+                                   ], callback);
+                               },
+                               callback);
         }
     ], callback);
 };
@@ -177,12 +181,12 @@ StatusNetUser.prototype.updateFollowing = function(callback) {
 
             ids = _.each(following, function(person) { return StatusNetUser.id(person); });
 
-            async.eachLimit(ids,
-                            25,
-                            function(id, callback) {
-                                Edge.create({from: snu.id, to: id}, callback);
-                            },
-                            callback);
+            async.forEachLimit(ids,
+                               25,
+                               function(id, callback) {
+                                   Edge.create({from: snu.id, to: id}, callback);
+                               },
+                               callback);
         }
     ], callback);
 };

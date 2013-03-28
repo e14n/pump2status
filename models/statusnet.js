@@ -149,8 +149,6 @@ StatusNet.prototype.getOAuth = function() {
 
     var statusnet = this;
 
-    console.dir(statusnet);
-
     return new OAuth(statusnet.request_token_endpoint,
                      statusnet.access_token_endpoint,
                      statusnet.client_id,
