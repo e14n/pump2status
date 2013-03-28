@@ -18,9 +18,8 @@
 
 var _ = require("underscore"),
     async = require("async"),
-    uuid = require("node-uuid"),
+    urlparse = require("url").parse,
     DatabankObject = require("databank").DatabankObject,
-    Pump2Status = require("./pump2status"),
     StatusNet = require("./statusnet"),
     Shadow = require("./shadow"),
     Edge = require("./edge"),
@@ -32,37 +31,70 @@ StatusNetUser.schema = {
     "statusnetuser": {
         pkey: "id",
         fields: ["name",
-                 "nickname",
-                 "homepage",
                  "hostname",
+                 "avatar",
                  "token",
                  "secret",
-                 "following",
+                 "friends",
                  "created",
                  "updated"]
     }
 };
 
-StatusNetUser.fromUser = function(hostname, person, token, secret, callback) {
+StatusNetUser.hostname = function(person) {
+    var parts = urlparse(person.statusnet_profile_url);
+    if (parts && parts.hostname) {
+        return parts.hostname;
+    } else {
+        return null;
+    }
+};
 
-    var snu = new StatusNetUser(person);
+StatusNetUser.id = function(person) {
+    var hostname = StatusNetUser.hostname(person);
 
-    snu.id        = person.screen_name + "@" + hostname;
-    snu.hostname  = hostname;
-    snu.token     = token;
-    snu.secret    = secret;
+    if (hostname && person.screen_name && person.screen_name.length > 0) {
+        return person.screen_name + "@" + hostname;
+    } else {
+        return null;
+    }
+};
+
+StatusNetUser.fromUser = function(person, token, secret, callback) {
+
+    var snu = new StatusNetUser();
+
+    snu.hostname  = StatusNetUser.hostname(person);
+
+    if (!snu.hostname) {
+        callback(new Error("No hostname"), null);
+        return;
+    }
+
+    snu.id = StatusNetUser.id(person);
+
+    if (!snu.id) {
+        callback(new Error("No id"), null);
+        return;
+    }
+
+    snu.name   = person.name;
+    snu.avatar = person.profile_image_url;
+
+    snu.token  = token;
+    snu.secret = secret;
+
     // XXX: SSL?
     // XXX: index.php/ prefix?
-    snu.following = 'http://'+hostname+'/api/statuses/friends/'+person.screen_name+'.json';
+
+    snu.following = 'http://'+snu.hostname+'/api/statuses/friends/'+person.screen_name+'.json';
 
     snu.save(callback);
 };
 
 StatusNetUser.getHostname = function(id) {
-    var parts = id.split("@"),
-        hostname = parts[1].toLowerCase();
-
-    return hostname;
+    var snu = this;
+    return snu.hostname;
 };
 
 StatusNetUser.prototype.getHost = function(callback) {
@@ -97,7 +129,6 @@ StatusNetUser.prototype.beFound = function(callback) {
             var waiters = _.pluck(edges, "from");
             Shadow.readArray(waiters, callback);
         },
-        // 
         function(shadows, callback) {
             var ids = _.pluck(shadows, "pumpio");
             // For each shadow, have it follow the pump.io account
@@ -119,6 +150,7 @@ StatusNetUser.prototype.beFound = function(callback) {
 };
 
 StatusNetUser.prototype.updateFollowing = function(callback) {
+
     var snu = this,
         sn,
         oa;
@@ -133,28 +165,48 @@ StatusNetUser.prototype.updateFollowing = function(callback) {
             oa.get(snu.following, snu.token, snu.secret, callback);
         },
         function(doc, resp, callback) {
-            var following;
+
+            var following, ids;
+
             try {
                 following = JSON.parse(doc);
             } catch (e) {
                 callback(e);
                 return;
-            };
-            var ids = _.pluck(following, "statusnet_profile_url");
-            // For each shadow, have it follow the pump.io account
+            }
+
+            ids = _.each(following, function(person) { return StatusNetUser.id(person); });
+
             async.eachLimit(ids,
                             25,
                             function(id, callback) {
-                                async.waterfall([
-                                    function(callback) {
-                                        User.get(id, callback);
-                                    },
-                                    function(waiter, callback) {
-                                        waiter.follow(user, callback);
-                                    }
-                                ], callback);
+                                Edge.create({from: snu.id, to: id}, callback);
                             },
                             callback);
+        }
+    ], callback);
+};
+
+// XXX: get already-following info
+
+StatusNetUser.prototype.findFriends = function(callback) {
+
+    var snu = this;
+
+    async.waterfall([
+        // Find outgoing edges from this user
+        function(callback) {
+            Edge.search({from: snu.id}, callback);
+        },
+        // Find pump.io IDs of originators of these edges waiting for this user to join
+        function(edges, callback) {
+            var snFriends = _.pluck(edges, "to");
+            Shadow.readArray(snFriends, callback);
+        },
+        function(shadows, callback) {
+            var ids = _.pluck(shadows, "pumpio");
+            // For each shadow, get its User
+            User.readArray(ids, callback);
         }
     ], callback);
 };

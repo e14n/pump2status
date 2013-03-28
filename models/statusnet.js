@@ -29,20 +29,15 @@ var _ = require("underscore"),
 var StatusNet = DatabankObject.subClass("statusnet");
 
 StatusNet.schema = {
-    "host": {
-        pkey: "hostname",
-        fields: ["client_id",
-                 "client_secret",
-                 "request_token_endpoint",
-                 "access_token_endpoint",
-                 "authorization_endpoint",
-                 "whoami_endpoint",
-                 "created",
-                 "updated"]
-    },
-    "hostlist": {
-        pkey: "id"
-    }
+    pkey: "hostname",
+    fields: ["client_id",
+             "client_secret",
+             "request_token_endpoint",
+             "access_token_endpoint",
+             "authorization_endpoint",
+             "whoami_endpoint",
+             "created",
+             "updated"]
 };
 
 StatusNet.ensureStatusNet = function(hostname, callback) {
@@ -80,7 +75,7 @@ StatusNet.discover = function(hostname, callback) {
             } else {
                 _.extend(props, {
                     client_id: "anonymous",
-                    client_token: "anonymous"
+                    client_secret: "anonymous"
                 });
             }
             StatusNet.create(props, callback);
@@ -153,6 +148,8 @@ StatusNet.prototype.whoami = function(token, secret, callback) {
 StatusNet.prototype.getOAuth = function() {
 
     var statusnet = this;
+
+    console.dir(statusnet);
 
     return new OAuth(statusnet.request_token_endpoint,
                      statusnet.access_token_endpoint,

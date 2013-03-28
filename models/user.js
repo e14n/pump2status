@@ -31,6 +31,8 @@ User.schema = {
     "user": {
         pkey: "id",
         fields: ["name",
+                 "homepage",
+                 "avatar",
                  "token",
                  "secret",
                  "inbox",
@@ -77,60 +79,19 @@ User.fromPerson = function(person, token, secret, callback) {
     async.waterfall([
         function(callback) {
             User.create({id: id,
-                           name: person.displayName,
-                           homepage: person.url,
-                           token: token,
-                           secret: secret,
-                           created: Date.now(),
-                           updated: Date.now(),
-                           inbox: person.links["activity-inbox"].href,
-                           outbox: person.links["activity-outbox"].href,
-                           followers: person.followers.url},
-                          callback);
+                         name: person.displayName,
+                         homepage: person.url,
+                         avatar: ((person.image && person.image.url) ? person.image.url : null),
+                         token: token,
+                         secret: secret,
+                         created: Date.now(),
+                         updated: Date.now(),
+                         inbox: person.links["activity-inbox"].href,
+                         outbox: person.links["activity-outbox"].href,
+                         followers: person.followers.url},
+                        callback);
         }
     ], callback);
-};
-
-// Keep a list of existing users so we can do periodic updates
-
-User.prototype.afterCreate = function(callback) {
-    var user = this,
-        bank = User.bank();
-
-    bank.append("userlist", 0, user.id, function(err, list) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null);
-        }
-    });
-};
-
-// Deleted users come off the list
-
-User.prototype.afterDel = function(callback) {
-    var user = this;
-
-    async.parallel([
-        function(callback) {
-            var bank = User.bank();
-            bank.remove("userlist", 0, user.id, callback);
-        },
-        function(callback) {
-            var bank = Plot.bank();
-            async.forEach(user.plots,
-                          function(plotID, callback) {
-                              bank.del("plot", plotID, callback);
-                          },
-                          callback);
-        }
-    ], function(err, results) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null);
-        }
-    });
 };
 
 User.getHostname = function(id) {
@@ -212,3 +173,5 @@ User.prototype.follow = function(other, callback) {
         }
     ], callback);
 };
+
+module.exports = User;

@@ -45,9 +45,6 @@ Host.schema = {
                  "whoami_endpoint",
                  "created",
                  "updated"]
-    },
-    "hostlist": {
-        pkey: "id"
     }
 };
 

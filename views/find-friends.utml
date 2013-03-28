@@ -1,0 +1,16 @@
+<h1>Plant a crop</h1>
+
+<ul class="thumbnails">
+
+  <% _.each(found, function(user) { %>
+
+  <li class="span3">
+    <div class="thumbnail">
+      <img src="<%- user.avatar %>" width="96" height="96" alt="<%- user.name %>">
+      <h3><%- user.name %> <small><%- user.id %></h3>
+    </div>
+  </li>
+
+  <% }); %>
+
+</ul>

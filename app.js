@@ -32,9 +32,11 @@ var fs = require("fs"),
     RequestToken = require("./models/requesttoken"),
     User = require("./models/user"),
     Host = require("./models/host"),
-    HostCount = require("./models/hostcount"),
-    TotalCount = require("./models/totalcount"),
     Pump2Status = require("./models/pump2status"),
+    StatusNetUser = require("./models/statusnetuser"),
+    StatusNet = require("./models/statusnet"),
+    Shadow = require("./models/shadow"),
+    Edge = require("./models/edge"),
     Updater = require("./lib/updater"),
     config,
     defaults = {
@@ -43,7 +45,7 @@ var fs = require("fs"),
         hostname: "localhost",
         driver: "disk",
         name: "Pump2Status",
-        description: "Stats server for the social web."
+        description: "Find your StatusNet friends on pump.io."
     },
     log,
     logParams = {
@@ -92,16 +94,9 @@ _.extend(config.params.schema, DatabankStore.schema);
 
 // Now, our stuff
 
-_.each([RequestToken, Host], function(Cls) {
+_.each([RequestToken, Host, User, StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
     config.params.schema[Cls.type] = Cls.schema;
 });
-
-// User has a global list
-
-_.extend(config.params.schema, User.schema);
-_.extend(config.params.schema, Host.schema);
-_.extend(config.params.schema, HostCount.schema);
-_.extend(config.params.schema, TotalCount.schema);
 
 var db = Databank.get(config.driver, config.params);
 
@@ -230,6 +225,32 @@ async.waterfall([
             }
         };
 
+        var reqSnuser = function(req, res, next) {
+            var snuid = req.params.snuid;
+
+            StatusNetUser.get(snuid, function(err, snuser) {
+                if (err) {
+                    next(err);
+                } else {
+                    req.snuser = snuser;
+                    next();
+                }
+            });
+        };
+
+        var userIsSnuser = function(req, res, next) {
+            
+            Shadow.get(req.snuser.id, function(err, shadow) {
+                if (err) {
+                    next(err);
+                } else if (shadow.pumpio != req.user.id) {
+                    next(new Error("Must be same user"));
+                } else {
+                    next();
+                }
+            });
+        };
+
         // Routes
 
         log.info("Initializing routes");
@@ -241,9 +262,11 @@ async.waterfall([
         app.get('/about', userAuth, userOptional, routes.about);
         app.get('/authorized/:hostname', routes.authorized);
         app.get('/.well-known/host-meta.json', routes.hostmeta);
-        app.get('/add-account', routes.addAccount);
-        app.post('/add-account', routes.handleAddAccount);
+        app.get('/add-account', userAuth, userRequired, routes.addAccount);
+        app.post('/add-account', userAuth, userRequired, routes.handleAddAccount);
         app.get('/authorized/statusnet/:hostname', userAuth, userRequired, routes.authorizedStatusNet);
+        app.get('/find-friends/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.findFriends);
+        app.post('/find-friends/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.saveFriends);
 
         // Create a dialback client
 

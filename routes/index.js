@@ -158,7 +158,7 @@ exports.handleLogout = function(req, res) {
 };
 
 exports.addAccount = function(req, res) {
-    res.render('add-account', { title: "Add Account" });
+    res.render('add-account', { title: "Add Account", user: req.user });
 };
 
 exports.handleAddAccount = function(req, res, next) {
@@ -169,10 +169,10 @@ exports.handleAddAccount = function(req, res, next) {
 
     async.waterfall([
         function(callback) {
-            StatusNet.ensureHost(id, callback);
+            StatusNet.ensureStatusNet(hostname, callback);
         },
         function(results, callback) {
-	    sn = results;
+            sn = results;
             sn.getRequestToken(callback);
         }
     ], function(err, rt) {
@@ -233,7 +233,7 @@ exports.authorizedStatusNet = function(req, res, next) {
         },
         function(results, callback) {
             object = results;
-            StatusNetUser.fromUser(hostname, object, access_token, token_secret, callback);
+            StatusNetUser.fromUser(object, access_token, token_secret, callback);
         },
         function(results, callback) {
             snuser = results;
@@ -254,6 +254,23 @@ exports.authorizedStatusNet = function(req, res, next) {
             next(err);
         } else {
             res.redirect("/find-friends/"+snuser.id);
+        }
+    });
+};
+
+exports.findFriends = function(req, res, next) {
+
+    var snuser = req.snuser,
+        found;
+
+    snuser.findFriends(function(err, found) {
+        if (err) {
+            next(err);
+        } else {
+            res.render('find-friends', {title: "Pump2Status - Find Friends",
+                                        user: req.user,
+                                        snuser: snuser,
+                                        found: found});
         }
     });
 };
