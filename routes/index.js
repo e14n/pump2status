@@ -100,6 +100,11 @@ exports.authorized = function(req, res, next) {
         object,
         newUser = false;
 
+    if (!token) {
+        next(new Error("No token returned."));
+        return;
+    }
+
     async.waterfall([
         function(callback) {
             async.parallel([
@@ -199,6 +204,7 @@ exports.authorizedStatusNet = function(req, res, next) {
     var hostname = req.params.hostname,
         token = req.query.oauth_token,
         verifier = req.query.oauth_verifier,
+        problem = req.query.oauth_problem,
         user = req.user,
         rt,
         sn,
@@ -208,6 +214,11 @@ exports.authorizedStatusNet = function(req, res, next) {
         id,
         object,
         newUser = false;
+
+    if (!token) {
+        next(new Error("No token returned."));
+        return;
+    }
 
     async.waterfall([
         function(callback) {
@@ -246,16 +257,12 @@ exports.authorizedStatusNet = function(req, res, next) {
             user.associate(snuser, callback);
         },
         function(callback) {
-            async.parallel([
-                function(callback) {
-                    snuser.beFound(callback);
-                },
-                function(callback) {
-                    snuser.updateFollowing(callback);
-                }
-            ], callback);
+            snuser.beFound(callback);
+        },
+        function(callback) {
+            snuser.updateFollowing(callback);
         }
-    ], function(err, user) {
+    ], function(err) {
         if (err) {
             next(err);
         } else {
