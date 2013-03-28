@@ -144,11 +144,11 @@ User.prototype.postActivity = function(act, callback) {
 };
 
 User.prototype.associate = function(snuser, callback) {
-    var user = this;
 
-    // XXX: better error handling if there's already an association
+    var user = this,
+        shadow = new Shadow({statusnet: snuser.id, pumpio: user.id});
 
-    Shadow.create({statusnet: snuser.id, pumpio: user.id}, callback);
+    shadow.save(callback);
 };
 
 User.prototype.follow = function(other, callback) {
@@ -168,6 +168,23 @@ User.prototype.follow = function(other, callback) {
         function(act, callback) {
             var edge = new Edge({from: user.id, to: other.id});
             edge.save(callback);
+        }
+    ], callback);
+};
+
+User.prototype.getShadows = function(callback) {
+
+    var user = this,
+        StatusNetUser = require("./statusnetuser"); // prevent loops
+
+    async.waterfall([
+        function(callback) {
+            // Search... in the shadows!
+            Shadow.search({pumpio: user.id}, callback);
+        },
+        function(shadows, callback) {
+            var ids = _.pluck(shadows, "statusnet");
+            StatusNetUser.readArray(ids, callback);
         }
     ], callback);
 };
