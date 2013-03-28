@@ -135,20 +135,24 @@ StatusNetUser.prototype.beFound = function(callback) {
         },
         function(shadows, callback) {
             var ids = _.pluck(shadows, "pumpio");
-            // For each shadow, have it follow the pump.io account
-            async.forEachLimit(ids,
-                               25,
-                               function(id, callback) {
-                                   async.waterfall([
-                                       function(callback) {
-                                           User.get(id, callback);
-                                       },
-                                       function(waiter, callback) {
-                                           waiter.follow(user, callback);
-                                       }
-                                   ], callback);
-                               },
-                               callback);
+            if (!ids || ids.length == 0) {
+                callback(null);
+            } else {
+                // For each shadow, have it follow the pump.io account
+                async.forEachLimit(ids,
+                                   25,
+                                   function(id, callback) {
+                                       async.waterfall([
+                                           function(callback) {
+                                               User.get(id, callback);
+                                           },
+                                           function(waiter, callback) {
+                                               waiter.follow(user, callback);
+                                           }
+                                       ], callback);
+                                   },
+                                   callback);
+            }
         }
     ], callback);
 };
@@ -179,12 +183,15 @@ StatusNetUser.prototype.updateFollowing = function(callback) {
                 return;
             }
 
-            ids = _.each(following, function(person) { return StatusNetUser.id(person); });
+            // Get valid-looking IDs
+
+            ids = _.compact(_.map(following, function(person) { return StatusNetUser.id(person); }));
 
             async.forEachLimit(ids,
                                25,
                                function(id, callback) {
-                                   Edge.create({from: snu.id, to: id}, callback);
+                                   var edge = new Edge({from: snu.id, to: id});
+                                   edge.save(callback);
                                },
                                callback);
         }
@@ -208,7 +215,7 @@ StatusNetUser.prototype.findFriends = function(callback) {
             Shadow.readArray(snFriends, callback);
         },
         function(shadows, callback) {
-            var ids = _.pluck(shadows, "pumpio");
+            var ids = _.uniq(_.pluck(_.compact(shadows), "pumpio"));
             // For each shadow, get its User
             User.readArray(ids, callback);
         }
