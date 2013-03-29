@@ -175,7 +175,9 @@ User.prototype.follow = function(other, callback) {
             var edge = new Edge({from: user.id, to: other.id});
             edge.save(callback);
         }
-    ], callback);
+    ], function(err, edge) {
+        callback(null, null);
+    });
 };
 
 User.prototype.getShadows = function(callback) {
