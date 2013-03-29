@@ -310,7 +310,6 @@ exports.saveFriends = function(req, res, next) {
                 var id = account.id.toLowerCase().replace(/[\.@]/g, '_');
                 return body[id] === 'on';
             });
-            console.log(_.pluck(chosen, "id"));
             async.forEachLimit(chosen,
                                10,
                                function(account, callback) {
