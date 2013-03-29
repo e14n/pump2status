@@ -155,7 +155,11 @@ exports.authorized = function(req, res, next) {
             next(err);
         } else {
             req.session.userID = user.id;
-            res.redirect("/");
+            if (newUser) {
+                res.redirect("/add-account");
+            } else {
+                res.redirect("/");
+            }
         }
     });
 };
