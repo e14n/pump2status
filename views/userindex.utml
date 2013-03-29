@@ -2,8 +2,6 @@
 
 <% if (shadows.length > 0) { %>
 
-<h2>Linked accounts</h2>
-
 <ul class="thumbnails">
 <% _.each(shadows, function(account) { %>
     <li class="span2">
@@ -11,7 +9,6 @@
         <img src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- account.name %>">
         <p><%- account.name %> <small class="muted"><%- account.id %></small></p>
         <p><a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends">Find friends</a></p>
-        <p><a href="/remove-account/<%- account.id %>" class="btn btn-mini remove-account">Remove</a></p>
       </div>
     </li>
 <% }); %>
