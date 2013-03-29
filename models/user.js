@@ -37,7 +37,7 @@ User.schema = {
                  "secret",
                  "inbox",
                  "outbox",
-                 "followers",
+                 "following",
                  "created",
                  "updated"]
     },
@@ -70,9 +70,9 @@ User.fromPerson = function(person, token, secret, callback) {
         return;
     }
 
-    if (!person.followers ||
-        !person.followers.url) {
-        callback(new Error("No followers."));
+    if (!person.following ||
+        !person.following.url) {
+        callback(new Error("No following."));
         return;
     }
 
@@ -88,7 +88,7 @@ User.fromPerson = function(person, token, secret, callback) {
                          updated: Date.now(),
                          inbox: person.links["activity-inbox"].href,
                          outbox: person.links["activity-outbox"].href,
-                         followers: person.followers.url},
+                         following: person.following.url},
                         callback);
         }
     ], callback);
