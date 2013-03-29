@@ -20,6 +20,10 @@ var _ = require("underscore"),
     wf = require("webfinger"),
     async = require("async"),
     qs = require("querystring"),
+    http = require("http"),
+    https = require("https"),
+    urlfmt = require("url").format,
+    urlparse = require("url").parse,
     OAuth = require("oauth").OAuth,
     DatabankObject = require("databank").DatabankObject,
     Host = require("./host"),
@@ -59,25 +63,52 @@ StatusNet.discover = function(hostname, callback) {
         hostname: hostname
     };
 
+    // OAuth credentials
+
+    if (_.has(StatusNet.credentials, hostname)) {
+        _.extend(props, StatusNet.credentials[hostname]);
+    } else {
+        _.extend(props, {
+            client_id: "anonymous",
+            client_secret: "anonymous"
+        });
+    }
+
     async.waterfall([
+        // We need to know whether to use HTTPS or HTTP. HEAD the config endpoint with both versions.
         function(callback) {
-            wf.hostmeta(hostname, callback);
+            async.detectSeries(['https:', 'http:'],
+                               function(proto, callback) {
+                                   var url = urlfmt({protocol: proto,
+                                                     hostname: hostname,
+                                                     path: "/api/statusnet/config.json"}),
+                                       mod = (proto == 'https:') ? https : http;
+                                   
+                                   mod.request(url, function(resp) {
+                                       if (resp.statusCode >= 200 && resp.statusCode < 300) {
+                                           callback(true);
+                                       } else {
+                                           callback(false);
+                                       }
+                                   }).on('error', function(err) {
+                                       callback(false);
+                                   }).end();
+                               },
+                               function(proto) {
+                                   if (proto) {
+                                       callback(null, proto);
+                                   } else {
+                                       callback(new Error("Can't retrieve config endpoint"), null);
+                                   }
+                               });
         },
-        function(jrd, callback) {
+        function(proto, callback) {
             _.extend(props, {
-                request_token_endpoint: "http://"+hostname+"/api/oauth/request_token",
-                access_token_endpoint: "http://"+hostname+"/api/oauth/access_token",
-                authorization_endpoint: "http://"+hostname+"/api/oauth/authorize",
-                whoami_endpoint: "http://"+hostname+"/api/account/verify_credentials.json"
+                request_token_endpoint: proto+"//"+hostname+"/api/oauth/request_token",
+                access_token_endpoint: proto+"//"+hostname+"/api/oauth/access_token",
+                authorization_endpoint: proto+"//"+hostname+"/api/oauth/authorize",
+                whoami_endpoint: proto+"//"+hostname+"/api/account/verify_credentials.json"
             });
-            if (_.has(StatusNet.credentials, hostname)) {
-                _.extend(props, StatusNet.credentials[hostname]);
-            } else {
-                _.extend(props, {
-                    client_id: "anonymous",
-                    client_secret: "anonymous"
-                });
-            }
             StatusNet.create(props, callback);
         }
     ], callback);
@@ -157,7 +188,7 @@ StatusNet.prototype.getOAuth = function() {
                      Pump2Status.url("/authorized/statusnet/"+statusnet.hostname),
                      "HMAC-SHA1",
                      null, // nonce size; use default
-                     {"User-Agent": "pump2status.com/0.1.0"});
+                     {"User-Agent": "pump2status.net/0.1.0"});
 };
 
 // Map of hostname => {client_id: ..., client_secret: ...}
