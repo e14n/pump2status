@@ -8,6 +8,8 @@
 
         <p>This service lets you link your pump.io account with your StatusNet account(s).</p>
 
+        <p>It helps you find your friends on the pump network.</p>
+
         <p><a href="/login" class="btn btn-primary">Get started &raquo;</a></p>
 
       </div>
