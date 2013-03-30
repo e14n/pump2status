@@ -135,7 +135,7 @@ StatusNetUser.prototype.beFound = function(callback) {
         },
         function(shadows, callback) {
             var ids = _.pluck(shadows, "pumpio");
-            if (!ids || ids.length == 0) {
+            if (!ids || ids.length === 0) {
                 callback(null);
             } else {
                 // For each shadow, have it follow the pump.io account
@@ -161,39 +161,57 @@ StatusNetUser.prototype.updateFollowing = function(callback) {
 
     var snu = this,
         sn,
-        oa;
+        oa,
+        addEdge = function(id, callback) {
+            var edge = new Edge({from: snu.id, to: id});
+            edge.save(callback);
+        },
+        q = async.queue(addEdge, 25);
 
     async.waterfall([
         function(callback) {
             snu.getHost(callback);
         },
         function(results, callback) {
+
+            var getPage = function(i, callback) {
+
+                async.waterfall([
+                    function(callback) {
+                        oa.get(snu.following + "?page=" + i, snu.token, snu.secret, callback);
+                    },
+                    function(doc, resp, callback) {
+                        var following, ids;
+
+                        try {
+                            following = JSON.parse(doc);
+                        } catch (e) {
+                            callback(e);
+                            return;
+                        }
+
+                        // Get valid-looking IDs
+
+                        ids = _.compact(_.map(following, function(person) { return StatusNetUser.id(person); }));
+
+                        q.push(ids);
+                        callback(null, following.length);
+                    }
+                ], function(err, len) {
+                    if (err) {
+                        callback(err);
+                    } else if (len < 100) {
+                        callback(null);
+                    } else {
+                        getPage(i+1, callback);
+                    }
+                });
+            };
+
             sn = results;
             oa = sn.getOAuth();
-            oa.get(snu.following, snu.token, snu.secret, callback);
-        },
-        function(doc, resp, callback) {
 
-            var following, ids;
-
-            try {
-                following = JSON.parse(doc);
-            } catch (e) {
-                callback(e);
-                return;
-            }
-
-            // Get valid-looking IDs
-
-            ids = _.compact(_.map(following, function(person) { return StatusNetUser.id(person); }));
-
-            async.forEachLimit(ids,
-                               25,
-                               function(id, callback) {
-                                   var edge = new Edge({from: snu.id, to: id});
-                                   edge.save(callback);
-                               },
-                               callback);
+            getPage(1, callback);
         }
     ], callback);
 };
