@@ -110,20 +110,28 @@ StatusNetUser.prototype.postActivity = function(act, callback) {
     callback(null, null);
 };
 
-StatusNetUser.prototype.beFound = function(callback) {
-    var snu = this,
-        user,
-        shadow;
+StatusNetUser.prototype.getUser = function(callback) {
+    var snu = this;
 
     async.waterfall([
         function(callback) {
             Shadow.get(snu.id, callback);
         },
-        function(results, callback) {
-            shadow = results;
+        function(shadow, callback) {
             User.get(shadow.pumpio, callback);
+        }
+    ], callback);
+};
+
+StatusNetUser.prototype.beFound = function(callback) {
+
+    var snu = this,
+        user;
+
+    async.waterfall([
+        function(callback) {
+            snu.getUser(callback);
         },
-        // Find incoming edges
         function(results, callback) {
             user = results;
             Edge.search({to: snu.id}, callback);
@@ -220,11 +228,17 @@ StatusNetUser.prototype.updateFollowing = function(callback) {
 
 StatusNetUser.prototype.findFriends = function(callback) {
 
-    var snu = this;
+    var snu = this,
+        user;
 
     async.waterfall([
-        // Find outgoing edges from this user
+        // Get the user
         function(callback) {
+            snu.getUser(callback);
+        },
+        // Find outgoing edges from this user
+        function(results, callback) {
+            user = results;
             Edge.search({from: snu.id}, callback);
         },
         // Find pump.io IDs of originators of these edges waiting for this user to join
@@ -233,7 +247,8 @@ StatusNetUser.prototype.findFriends = function(callback) {
             Shadow.readArray(snFriends, callback);
         },
         function(shadows, callback) {
-            var ids = _.uniq(_.pluck(_.compact(shadows), "pumpio"));
+            var ids = _.filter(_.uniq(_.pluck(_.compact(shadows), "pumpio")),
+                               function(id) { return id != user.id; });
             // For each shadow, get its User
             User.readArray(ids, callback);
         }
