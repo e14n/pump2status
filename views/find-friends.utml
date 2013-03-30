@@ -2,6 +2,8 @@
 
 <p>These are the pump.io accounts of friends of <%- snuser.id %>.</p>
 
+<div class="row span12">
+
 <form action="/find-friends/<%- snuser.id %>" method="post">
 
   <label class="checkbox">
@@ -30,3 +32,5 @@
   <input type="submit" class="btn btn-primary" value="Follow"></input>
 
 </form>
+
+</div>
