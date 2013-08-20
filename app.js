@@ -267,6 +267,8 @@ async.waterfall([
         app.get('/authorized/statusnet/:hostname', userAuth, userRequired, routes.authorizedStatusNet);
         app.get('/find-friends/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.findFriends);
         app.post('/find-friends/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.saveFriends);
+        app.get('/settings/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.settings);
+        app.post('/settings/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.saveSettings);
 
         // Create a dialback client
 

@@ -8,7 +8,10 @@
       <div class="thumbnail">
         <img src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- account.name %>">
         <p><%- account.name %> <small class="muted"><%- account.id %></small></p>
-        <p><a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends">Find friends</a></p>
+        <p>
+          <a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends">Find friends</a>
+          <a href="/settings/<%- account.id %>" class="btn btn-mini find-friends">Settings</a>
+        </p>
       </div>
     </li>
 <% }); %>

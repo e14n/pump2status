@@ -329,3 +329,69 @@ exports.saveFriends = function(req, res, next) {
         }
     });
 };
+
+exports.findFriends = function(req, res, next) {
+
+    var snuser = req.snuser,
+        found;
+
+    snuser.findFriends(function(err, found) {
+        if (err) {
+            next(err);
+        } else {
+            if (found.length === 0) {
+                res.render('no-friends', {title: "Pump2Status - No Friends Found",
+                                            user: req.user,
+                                            snuser: snuser});
+            } else {
+                res.render('find-friends', {title: "Pump2Status - Find Friends",
+                                            user: req.user,
+                                            snuser: snuser,
+                                            found: found});
+            }
+        }
+    });
+};
+
+exports.saveFriends = function(req, res, next) {
+
+    var user = req.user,
+        snuser = req.snuser,
+        body = req.body,
+        found;
+
+    async.waterfall([
+        function(callback) {
+            snuser.findFriends(callback);
+        },
+        function(found, callback) {
+            var chosen = _.filter(found, function(account) {
+                var id = account.id.toLowerCase().replace(/[\.@]/g, '_');
+                return body[id] === 'on';
+            });
+            async.forEachLimit(chosen,
+                               10,
+                               function(account, callback) {
+                                   user.follow(account, callback);
+                               },
+                               callback);
+        }
+    ], function(err) {
+        if (err) {
+            next(err);
+        } else {
+            res.redirect("/");
+        }
+    });
+};
+
+exports.settings = function(req, res, next) {
+
+    var user = req.user,
+        snuser = req.snuser;
+
+    res.render('settings', {title: "Pump2Status - Settings",
+                            user: user,
+                            snuser: snuser});
+
+};

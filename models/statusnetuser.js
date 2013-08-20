@@ -36,6 +36,10 @@ StatusNetUser.schema = {
                  "token",
                  "secret",
                  "friends",
+                 "noautofollow",
+                 "hide",
+                 "nopost",
+                 "postreplies",
                  "created",
                  "updated"]
     }
