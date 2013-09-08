@@ -19,6 +19,8 @@
 var fs = require("fs"),
     async = require("async"),
     path = require("path"),
+    http = require("http"),
+    https = require("https"),
     _ = require("underscore"),
     express = require('express'),
     DialbackClient = require("dialback-client"),
@@ -108,6 +110,7 @@ async.waterfall([
     function(callback) {
 
         var app,
+            srv,
             bounce,
             client,
             requestLogger = function(log) {
@@ -130,23 +133,7 @@ async.waterfall([
 
         DatabankObject.bank = db;
 
-        if (_.has(config, "key")) {
-
-            log.info("Using SSL");
-
-            app = express.createServer({key: fs.readFileSync(config.key),
-                                        cert: fs.readFileSync(config.cert)});
-            bounce = express.createServer(function(req, res, next) {
-                var host = req.header('Host');
-                res.redirect('https://'+host+req.url, 301);
-            });
-
-        } else {
-
-            log.info("Not using SSL");
-
-            app = express.createServer();
-        }
+        app = new express();
 
         // Configuration
 
@@ -323,8 +310,29 @@ async.waterfall([
 
         log.info({port: config.port, address: config.address}, "Starting app listener");
 
-        app.listen(config.port, config.address, callback);
+        var srv, bounce;
 
+        if (_.has(config, "key")) {
+
+            log.info("Using SSL");
+
+            srv = https.createServer({key: fs.readFileSync(config.key),
+                                      cert: fs.readFileSync(config.cert)}, app);
+
+            bounce = http.createServer(function(req, res, next) {
+                var host = req.header('Host');
+                res.redirect('https://'+host+req.url, 301);
+            });
+
+        } else {
+
+            log.info("Not using SSL");
+
+            srv = http.createServer(app);
+        }
+        
+        srv.listen(config.port, config.address, callback);
+        
         // Start the bouncer
 
         if (bounce) {
