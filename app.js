@@ -23,6 +23,7 @@ var fs = require("fs"),
     https = require("https"),
     _ = require("underscore"),
     express = require('express'),
+    consolidate = require('consolidate'),
     DialbackClient = require("dialback-client"),
     Logger = require("bunyan"),
     routes = require('./routes'),
@@ -144,6 +145,7 @@ async.waterfall([
         app.configure(function(){
             app.set('views', __dirname + '/views');
             app.set('view engine', 'utml');
+            app.engine('utml', consolidate.underscore);
             app.use(requestLogger(log));
             app.use(express.bodyParser());
             app.use(express.cookieParser());
@@ -167,7 +169,7 @@ async.waterfall([
         var userAuth = function(req, res, next) {
 
             req.user = null;
-            res.local("user", null);
+            res.locals.user = null;
 
             if (!req.session.userID) {
                 next();
@@ -177,7 +179,7 @@ async.waterfall([
                         next(err);
                     } else {
                         req.user = user;
-                        res.local("user", user);
+                        res.locals.user = user;
                         next();
                     }
                 });
