@@ -23,7 +23,6 @@ var fs = require("fs"),
     https = require("https"),
     _ = require("underscore"),
     express = require('express'),
-    consolidate = require('consolidate'),
     DialbackClient = require("dialback-client"),
     Logger = require("bunyan"),
     routes = require('./routes'),
@@ -40,6 +39,7 @@ var fs = require("fs"),
     StatusNet = require("./models/statusnet"),
     Shadow = require("./models/shadow"),
     Edge = require("./models/edge"),
+    utmlish = require("./lib/utmlish"),
     Updater = require("./lib/updater"),
     config,
     defaults = {
@@ -142,10 +142,11 @@ async.waterfall([
 
         log.info("Configuring app");
 
+
         app.configure(function(){
             app.set('views', __dirname + '/views');
             app.set('view engine', 'utml');
-            app.engine('utml', consolidate.underscore);
+            app.engine('utml', utmlish);
             app.use(requestLogger(log));
             app.use(express.bodyParser());
             app.use(express.cookieParser());
