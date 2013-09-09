@@ -313,8 +313,6 @@ async.waterfall([
 
         log.info({port: config.port, address: config.address}, "Starting app listener");
 
-        var srv, bounce;
-
         if (_.has(config, "key")) {
 
             log.info("Using SSL");
@@ -323,7 +321,7 @@ async.waterfall([
                                       cert: fs.readFileSync(config.cert)}, app);
 
             bounce = http.createServer(function(req, res, next) {
-                var host = req.header('Host');
+                var host = req.headers.host;
                 res.redirect('https://'+host+req.url, 301);
             });
 
