@@ -6,11 +6,11 @@
         "consolidate": "0.9.x",
         "underscore": "1.5.x",
         "webfinger": "0.4.x",
-        "databank": "0.18.x",
+        "databank": "0.19.x",
         "dialback-client": "~0.1.1",
         "oauth": "0.9.x",
         "async": "0.2.x",
-        "connect-databank": "0.8.x",
+        "connect-databank": "0.12.x",
         "node-uuid": "1.4.x",
         "bunyan": "0.21.x"
     }
