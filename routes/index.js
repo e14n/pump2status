@@ -329,3 +329,13 @@ exports.saveFriends = function(req, res, next) {
         }
     });
 };
+
+exports.settings = function(req, res) {
+    res.render('settings', {title: "Settings for " + req.snuser.id,
+                            snuser: req.snuser,
+                            user: req.user});
+};
+
+exports.saveSettings = function(req, res, next) {
+    next(new Error("Not yet implemented"));
+};
