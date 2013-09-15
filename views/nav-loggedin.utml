@@ -7,7 +7,6 @@
   <a class="brand" href="/">Pump2Status</a>
   <div class="nav-collapse collapse">
     <ul class="nav">
-      <li><a href="/settings">Settings</a></li>
       <li><form class="form-inline" style="margin-bottom: 0px" action="/logout" method="post"><input type="submit" class="btn" value="Logout" /></form></li>
     </ul>
   </div><!--/.nav-collapse -->
