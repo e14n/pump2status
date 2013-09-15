@@ -1,0 +1,31 @@
+<legend>Settings for <%= snuser.id %></legend>
+
+<form id="settings">
+
+  <fieldset>
+
+    <label class="checkbox">
+      <input type="checkbox" name="autofollow" value="">
+      Automatically follow my StatusNet friends as they join the pump network
+    </label>
+    
+    <label class="checkbox">
+      <input type="checkbox" name="discover" value="">
+      Let other people find me
+    </label>
+
+    <label class="checkbox">
+      <input type="checkbox" name="autopost" value="">
+      Post pump network activities to my StatusNet site
+    </label>
+
+  </fieldset>
+
+  <fieldset>
+    <div class="actions">
+      <input type="submit" class="btn btn-primary" value="Save">
+      <a href="/" class="btn">Cancel</a>
+    </div>
+  </fieldset>  
+
+</form>
