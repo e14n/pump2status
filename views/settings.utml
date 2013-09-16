@@ -1,21 +1,18 @@
-<legend>Settings for <%= snuser.id %></legend>
+<% if (saved) { %>
+    <div class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    Settings saved.
+    </div>
+<% } %>
 
-<form id="settings">
+<h1>Settings for <%= snuser.id %></h1>
+
+<form id="settings" method="post">
 
   <fieldset>
 
     <label class="checkbox">
-      <input type="checkbox" name="autofollow" value="">
-      Automatically follow my StatusNet friends as they join the pump network
-    </label>
-    
-    <label class="checkbox">
-      <input type="checkbox" name="discover" value="">
-      Let other people find me
-    </label>
-
-    <label class="checkbox">
-      <input type="checkbox" name="autopost" value="">
+      <input type="checkbox" name="autopost" <% if (snuser.autopost) { %>checked="checked"<% } %> value="on">
       Post pump network activities to my StatusNet site
     </label>
 

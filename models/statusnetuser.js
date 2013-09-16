@@ -36,6 +36,7 @@ StatusNetUser.schema = {
                  "token",
                  "secret",
                  "friends",
+                 "autopost",
                  "created",
                  "updated"]
     }

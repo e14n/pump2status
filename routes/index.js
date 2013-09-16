@@ -332,10 +332,29 @@ exports.saveFriends = function(req, res, next) {
 
 exports.settings = function(req, res) {
     res.render('settings', {title: "Settings for " + req.snuser.id,
+                            saved: false,
                             snuser: req.snuser,
                             user: req.user});
 };
 
 exports.saveSettings = function(req, res, next) {
-    next(new Error("Not yet implemented"));
+    var autopost = _.has(req.body, "autopost"),
+        snuser = req.snuser;
+
+    async.waterfall([
+        function(callback) {
+            snuser.autopost = autopost;
+            snuser.save(callback);
+        }
+    ], function(err, snuser) {
+        if (err) {
+            next(err);
+        } else {
+            res.render('settings', {title: "Settings for " + req.snuser.id,
+                                    saved: true,
+                                    snuser: req.snuser,
+                                    user: req.user});
+        }
+    });
+    
 };
