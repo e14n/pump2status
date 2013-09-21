@@ -323,8 +323,11 @@ async.waterfall([
                                       cert: fs.readFileSync(config.cert)}, app);
 
             bounce = http.createServer(function(req, res, next) {
-                var host = req.headers.host;
-                res.redirect('https://'+host+req.url, 301);
+                var host = req.headers.host,
+                    url = 'https://'+host+req.url;
+                res.writeHead(301, {'Location': url,
+                                    'Content-Type': 'text/html'});
+                res.end('<a href="'+url+'">'+url+'</a>');
             });
 
         } else {
