@@ -1,6 +1,6 @@
 // app.js
 //
-// main function for live updates
+// pump2status entrypoint
 //
 // Copyright 2013, E14N (https://e14n.com/)
 //
@@ -17,47 +17,31 @@
 // limitations under the License.
 
 var fs = require("fs"),
-    async = require("async"),
     path = require("path"),
-    http = require("http"),
-    https = require("https"),
+    async = require("async"),
     _ = require("underscore"),
-    express = require('express'),
-    DialbackClient = require("dialback-client"),
-    Logger = require("bunyan"),
     routes = require('./routes'),
     databank = require("databank"),
-    uuid = require("node-uuid"),
     Databank = databank.Databank,
     DatabankObject = databank.DatabankObject,
-    DatabankStore = require('connect-databank')(express),
-    RequestToken = require("./models/requesttoken"),
-    User = require("./models/user"),
-    Host = require("./models/host"),
-    Pump2Status = require("./models/pump2status"),
+    PumpIOClientApp = require("pump.io-client-app"),
     StatusNetUser = require("./models/statusnetuser"),
     StatusNet = require("./models/statusnet"),
     Shadow = require("./models/shadow"),
     Edge = require("./models/edge"),
-    utmlish = require("./lib/utmlish"),
     Updater = require("./lib/updater"),
     config,
     defaults = {
-        port: 4000,
-        address: "localhost",
-        hostname: "localhost",
-        driver: "disk",
         name: "Pump2Status",
-        description: "Find your StatusNet friends on pump.io."
+        description: "Find your StatusNet friends on pump.io.",
+        params: {},
+        views: path.join(__dirname, "views"),
+        static: path.join(__dirname, "public")
     },
-    log,
-    logParams = {
-        name: "pump2status",
-        serializers: {
-            req: Logger.stdSerializers.req,
-            res: Logger.stdSerializers.res
-        }
-    };
+    userAuth = PumpIOClientApp.userAuth,
+    userOptional = PumpIOClientApp.userOptional,
+    userRequired = PumpIOClientApp.userRequired,
+    noUser = PumpIOClientApp.noUser;
 
 if (fs.existsSync("/etc/pump2status.json")) {
     config = _.defaults(JSON.parse(fs.readFileSync("/etc/pump2status.json")),
@@ -66,290 +50,69 @@ if (fs.existsSync("/etc/pump2status.json")) {
     config = defaults;
 }
 
-if (config.logfile) {
-    logParams.streams = [{path: config.logfile}];
-} else if (config.nologger) {
-    logParams.streams = [{path: "/dev/null"}];
-} else {
-    logParams.streams = [{stream: process.stderr}];
-}
-
-log = new Logger(logParams);
-
-log.info("Initializing pump live");
-
-if (!config.params) {
-    if (config.driver == "disk") {
-        config.params = {dir: "/var/lib/pump2status/"};
-    } else {
-        config.params = {};
-    }
-}
-
-// Define the database schema
-
-if (!config.params.schema) {
-    config.params.schema = {};
-}
-
-_.extend(config.params.schema, DialbackClient.schema);
-_.extend(config.params.schema, DatabankStore.schema);
-
 // Now, our stuff
 
-_.each([RequestToken, Host, User, StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
+_.each([StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
     config.params.schema[Cls.type] = Cls.schema;
 });
 
-var db = Databank.get(config.driver, config.params);
+// sets up the config
 
-async.waterfall([
-    function(callback) {
-        log.info({driver: config.driver, params: config.params}, "Connecting to DB");
-        db.connect({}, callback);
-    },
-    function(callback) {
+var app = new PumpIOClientApp(config);
 
-        var app,
-            srv,
-            bounce,
-            client,
-            requestLogger = function(log) {
-                return function(req, res, next) {
-                    var weblog = log.child({"req_id": uuid.v4(), component: "web"});
-                    var end = res.end;
-                    req.log = weblog;
-                    res.end = function(chunk, encoding) {
-                        var rec;
-                        res.end = end;
-                        res.end(chunk, encoding);
-                        rec = {req: req, res: res};
-                        weblog.info(rec);
-                    };
-                    next();
-                };
-            };
-
-        // Set global databank info
-
-        DatabankObject.bank = db;
-
-        app = new express();
-
-        // Configuration
-
-        var dbstore = new DatabankStore(db, log, 60000);
-
-        log.info("Configuring app");
-
-
-        app.configure(function(){
-            app.set('views', __dirname + '/views');
-            app.set('view engine', 'utml');
-            app.engine('utml', utmlish);
-            app.use(requestLogger(log));
-            app.use(express.bodyParser());
-            app.use(express.cookieParser());
-            app.use(express.methodOverride());
-            app.use(express.session({secret: (_(config).has('sessionSecret')) ? config.sessionSecret : "insecure",
-                                     store: dbstore}));
-            app.use(app.router);
-            app.use(express.static(__dirname + '/public'));
-        });
-
-        app.configure('development', function(){
-            app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-        });
-
-        app.configure('production', function(){
-            app.use(express.errorHandler());
-        });
-
-        // Auth middleware
-
-        var userAuth = function(req, res, next) {
-
-            req.user = null;
-            res.locals.user = null;
-
-            if (!req.session.userID) {
-                next();
-            } else {
-                User.get(req.session.userID, function(err, user) {
-                    if (err) {
-                        next(err);
-                    } else {
-                        req.user = user;
-                        res.locals.user = user;
-                        next();
-                    }
-                });
-            }
-        };
-
-        var userOptional = function(req, res, next) {
-            next();
-        };
-
-        var userRequired = function(req, res, next) {
-            if (!req.user) {
-                next(new Error("User is required"));
-            } else {
-                next();
-            }
-        };
-
-        var noUser = function(req, res, next) {
-            if (req.user) {
-                next(new Error("Already logged in"));
-            } else {
-                next();
-            }
-        };
-
-        var userIsUser = function(req, res, next) {
-            if (req.params.webfinger && req.user.id == req.params.webfinger) {
-                next();
-            } else {
-                next(new Error("Must be the same user"));
-            }
-        };
-
-        var reqSnuser = function(req, res, next) {
-            var snuid = req.params.snuid;
-
-            StatusNetUser.get(snuid, function(err, snuser) {
-                if (err) {
-                    next(err);
-                } else {
-                    req.snuser = snuser;
-                    next();
-                }
-            });
-        };
-
-        var userIsSnuser = function(req, res, next) {
-            
-            Shadow.get(req.snuser.id, function(err, shadow) {
-                if (err) {
-                    next(err);
-                } else if (shadow.pumpio != req.user.id) {
-                    next(new Error("Must be same user"));
-                } else {
-                    next();
-                }
-            });
-        };
-
-        // Routes
-
-        log.info("Initializing routes");
-
-        app.get('/', userAuth, userOptional, routes.index);
-        app.get('/login', userAuth, noUser, routes.login);
-        app.post('/login', userAuth, noUser, routes.handleLogin);
-        app.post('/logout', userAuth, userRequired, routes.handleLogout);
-        app.get('/about', userAuth, userOptional, routes.about);
-        app.get('/authorized/:hostname', routes.authorized);
-        app.get('/.well-known/host-meta.json', routes.hostmeta);
-        app.get('/add-account', userAuth, userRequired, routes.addAccount);
-        app.post('/add-account', userAuth, userRequired, routes.handleAddAccount);
-        app.get('/authorized/statusnet/:hostname', userAuth, userRequired, routes.authorizedStatusNet);
-        app.get('/find-friends/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.findFriends);
-        app.post('/find-friends/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.saveFriends);
-        app.get('/settings/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.settings);
-        app.post('/settings/:snuid', userAuth, userRequired, reqSnuser, userIsSnuser, routes.saveSettings);
-
-        // Create a dialback client
-
-        log.info("Initializing dialback client");
-
-        client = new DialbackClient({
-            hostname: config.hostname,
-            app: app,
-            bank: db,
-            userAgent: "Pump2Status/0.1.0"
-        });
-
-        // Configure this global object
-
-        Host.dialbackClient = client;
-
-        // Configure the service object
-
-        log.info({name: config.name, 
-                  description: config.description, 
-                  hostname: config.hostname},
-                 "Initializing Pump2Status object");
-
-        Pump2Status.name        = config.name;
-        Pump2Status.description = config.description;
-        Pump2Status.hostname    = config.hostname;
-
-        Pump2Status.protocol = (config.key) ? "https" : "http";
-
-        // Let Web stuff get to config
-
-        app.config = config;
-
-        // For handling errors
-
-        app.log = function(obj) {
-            if (obj instanceof Error) {
-                log.error(obj);
-            } else {
-                log.info(obj);
-            }
-        };
-
-        // updater -- keeps the world up-to-date
-        // XXX: move to master process when clustering
-
-        log.info("Initializing updater");
-
-        app.updater = new Updater({log: log});
-
-        app.updater.start();
-
-        // Start the app
-
-        log.info({port: config.port, address: config.address}, "Starting app listener");
-
-        if (_.has(config, "key")) {
-
-            log.info("Using SSL");
-
-            srv = https.createServer({key: fs.readFileSync(config.key),
-                                      cert: fs.readFileSync(config.cert)}, app);
-
-            bounce = http.createServer(function(req, res, next) {
-                var host = req.headers.host,
-                    url = 'https://'+host+req.url;
-                res.writeHead(301, {'Location': url,
-                                    'Content-Type': 'text/html'});
-                res.end('<a href="'+url+'">'+url+'</a>');
-            });
-
-        } else {
-
-            log.info("Not using SSL");
-
-            srv = http.createServer(app);
-        }
-        
-        srv.listen(config.port, config.address, callback);
-        
-        // Start the bouncer
-
-        if (bounce) {
-            log.info({port: 80, address: config.address}, "Starting bounce listener");
-            bounce.listen(80, config.address);
-        }
-
-    }], function(err) {
+app.param("snuid", function(req, res, next, snuid) {
+    StatusNetUser.get(snuid, function(err, snuser) {
         if (err) {
-            log.error(err);
+            next(err);
         } else {
-            console.log("Express server listening on address %s port %d", config.address, config.port);
+            req.snuser = snuser;
+            next();
         }
+    });
+});
+
+var userIsSnuser = function(req, res, next) {
+    
+    Shadow.get(req.snuser.id, function(err, shadow) {
+        if (err) {
+            next(err);
+        } else if (shadow.pumpio != req.user.id) {
+            next(new Error("Must be same user"));
+        } else {
+            next();
+        }
+    });
+};
+
+// Routes
+
+app.log.info("Initializing routes");
+
+app.get('/add-account', userAuth, userRequired, routes.addAccount);
+app.post('/add-account', userAuth, userRequired, routes.handleAddAccount);
+app.get('/authorized/statusnet/:hostname', userAuth, userRequired, routes.authorizedStatusNet);
+app.get('/find-friends/:snuid', userAuth, userRequired, userIsSnuser, routes.findFriends);
+app.post('/find-friends/:snuid', userAuth, userRequired, userIsSnuser, routes.saveFriends);
+app.get('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.settings);
+app.post('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.saveSettings);
+
+// updater -- keeps the world up-to-date
+// XXX: move to master process when clustering
+
+app.log.info("Initializing updater");
+
+app.updater = new Updater({log: log});
+
+app.updater.start();
+
+// Start the app
+
+app.log.info({port: config.port, address: config.address}, "Starting app listener");
+
+app.run(function(err) {
+    if (err) {
+        app.log.error(err);
+    } else {
+        console.log("Express server listening on address %s port %d", config.address, config.port);
+    }
 });    
