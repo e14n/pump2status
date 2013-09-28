@@ -1,9 +1,9 @@
 <h1><%- user.name %> <small><%- user.id %></small></h1>
 
-<% if (shadows.length > 0) { %>
+<% if (user.shadows && user.shadows.length > 0) { %>
 
 <ul class="thumbnails">
-<% _.each(shadows, function(account) { %>
+<% _.each(user.shadows, function(account) { %>
     <li class="span2">
       <div class="thumbnail">
         <img src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- account.name %>">

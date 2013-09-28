@@ -64,6 +64,34 @@ _.each([StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
 
 var app = new PumpIOClientApp(config);
 
+// Attach shadows to the user
+
+var oldAfterGet = PumpIOClientApp.User.prototype.afterGet;
+
+PumpIOClientApp.User.prototype.afterGet = function(callback) {
+    var user = this;
+
+    async.waterfall([
+        function(callback) {
+            // Call the default hook first
+            oldAfterGet.call(user, callback);
+        },
+        function(callback) {
+            Shadow.search({pumpio: user.id}, callback);
+        },
+        function(shadows, callback) {
+            StatusNetUser.readAll(_.pluck(shadows, "statusnet"), callback);
+        }
+    ], function(err, statusnetusers) {
+        if (err) {
+            callback(err);
+        } else {
+            user.shadows = statusnetusers;
+            callback(null);
+        }
+    });
+};
+
 // Our params
 
 app.param("snuid", function(req, res, next, snuid) {
