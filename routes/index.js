@@ -16,16 +16,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var wf = require("webfinger"),
-    async = require("async"),
+var async = require("async"),
     _ = require("underscore"),
-    uuid = require("node-uuid"),
-    User = require("../models/user"),
-    Host = require("../models/host"),
     StatusNet = require("../models/statusnet"),
     StatusNetUser = require("../models/statusnetuser"),
-    RequestToken = require("../models/requesttoken"),
-    Pump2Status = require("../models/pump2status");
+    PumpIOClientApp = require("pump.io-client-app"),
+    RequestToken = PumpIOClientApp.RequestToken;
 
 exports.addAccount = function(req, res) {
     res.render('add-account', { title: "Add Account", user: req.user });
@@ -34,7 +30,7 @@ exports.addAccount = function(req, res) {
 exports.handleAddAccount = function(req, res, next) {
 
     var id = req.body.webfinger,
-        hostname = User.getHostname(id),
+        hostname = StatusNetUser.getHostname(id),
         sn;
 
     async.waterfall([
@@ -43,7 +39,7 @@ exports.handleAddAccount = function(req, res, next) {
         },
         function(results, callback) {
             sn = results;
-            sn.getRequestToken(callback);
+            sn.getRequestToken(req.site, callback);
         }
     ], function(err, rt) {
         if (err) {
@@ -93,7 +89,7 @@ exports.authorizedStatusNet = function(req, res, next) {
         function(results, callback) {
             rt = results[0];
             sn = results[1];
-            sn.getAccessToken(rt, verifier, callback);
+            sn.getAccessToken(req.site, rt, verifier, callback);
         },
         function(token, secret, extra, callback) {
             access_token = token;
@@ -103,7 +99,7 @@ exports.authorizedStatusNet = function(req, res, next) {
                     rt.del(callback);
                 },
                 function(callback) {
-                    sn.whoami(access_token, token_secret, callback);
+                    sn.whoami(req.site, access_token, token_secret, callback);
                 }
             ], callback);
         },
@@ -141,8 +137,8 @@ exports.findFriends = function(req, res, next) {
         } else {
             if (found.length === 0) {
                 res.render('no-friends', {title: "Pump2Status - No Friends Found",
-                                            user: req.user,
-                                            snuser: snuser});
+                                          user: req.user,
+                                          snuser: snuser});
             } else {
                 res.render('find-friends', {title: "Pump2Status - Find Friends",
                                             user: req.user,

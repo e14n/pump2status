@@ -50,6 +50,10 @@ if (fs.existsSync("/etc/pump2status.json")) {
     config = defaults;
 }
 
+if (!config.params.schema) {
+    config.params.schema = {};
+}
+
 // Now, our stuff
 
 _.each([StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
@@ -59,6 +63,8 @@ _.each([StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
 // sets up the config
 
 var app = new PumpIOClientApp(config);
+
+// Our params
 
 app.param("snuid", function(req, res, next, snuid) {
     StatusNetUser.get(snuid, function(err, snuser) {
@@ -101,9 +107,7 @@ app.post('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.saveSe
 
 app.log.info("Initializing updater");
 
-app.updater = new Updater({log: log});
-
-app.updater.start();
+app.updater = new Updater({log: app.log});
 
 // Start the app
 
@@ -114,5 +118,6 @@ app.run(function(err) {
         app.log.error(err);
     } else {
         console.log("Express server listening on address %s port %d", config.address, config.port);
+        app.updater.start();
     }
 });    

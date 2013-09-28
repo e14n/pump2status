@@ -23,7 +23,8 @@ var _ = require("underscore"),
     StatusNet = require("./statusnet"),
     Shadow = require("./shadow"),
     Edge = require("./edge"),
-    User = require("./user");
+    PumpIOClientApp = require("pump.io-client-app"),
+    User = PumpIOClientApp.User;
 
 var StatusNetUser = DatabankObject.subClass("statusnetuser");
 
@@ -98,8 +99,10 @@ StatusNetUser.fromUser = function(person, token, secret, callback) {
 };
 
 StatusNetUser.getHostname = function(id) {
-    var snu = this;
-    return snu.hostname;
+    var parts = id.split("@"),
+        hostname = parts[1].toLowerCase();
+
+    return hostname;
 };
 
 StatusNetUser.prototype.getHost = function(callback) {

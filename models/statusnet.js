@@ -25,10 +25,9 @@ var _ = require("underscore"),
     urlfmt = require("url").format,
     urlparse = require("url").parse,
     OAuth = require("oauth").OAuth,
+    PumpIOClientApp = require("pump.io-client-app"),
     DatabankObject = require("databank").DatabankObject,
-    Host = require("./host"),
-    Pump2Status = require("./pump2status"),
-    RequestToken = require("./requesttoken");
+    RequestToken = PumpIOClientApp.RequestToken;
 
 var StatusNet = DatabankObject.subClass("statusnet");
 
@@ -114,9 +113,9 @@ StatusNet.discover = function(hostname, callback) {
     ], callback);
 };
 
-StatusNet.prototype.getRequestToken = function(callback) {
+StatusNet.prototype.getRequestToken = function(site, callback) {
     var statusnet = this,
-        oa = statusnet.getOAuth();
+        oa = statusnet.getOAuth(site);
 
     async.waterfall([
         function(callback) {
@@ -144,16 +143,16 @@ StatusNet.prototype.authorizeURL = function(rt, callback) {
     return statusnet.authorization_endpoint + separator + "oauth_token=" + rt.token;
 };
 
-StatusNet.prototype.getAccessToken = function(rt, verifier, callback) {
+StatusNet.prototype.getAccessToken = function(site, rt, verifier, callback) {
     var statusnet = this,
-        oa = statusnet.getOAuth();
+        oa = statusnet.getOAuth(site);
 
     oa.getOAuthAccessToken(rt.token, rt.secret, verifier, callback);
 };
 
-StatusNet.prototype.whoami = function(token, secret, callback) {
+StatusNet.prototype.whoami = function(site, token, secret, callback) {
     var statusnet = this,
-        oa = statusnet.getOAuth();
+        oa = statusnet.getOAuth(site);
 
     // XXX: ssl
 
@@ -176,7 +175,7 @@ StatusNet.prototype.whoami = function(token, secret, callback) {
     });
 };
 
-StatusNet.prototype.getOAuth = function() {
+StatusNet.prototype.getOAuth = function(site) {
 
     var statusnet = this;
 
@@ -185,10 +184,10 @@ StatusNet.prototype.getOAuth = function() {
                      statusnet.client_id,
                      statusnet.client_secret,
                      "1.0",
-                     Pump2Status.url("/authorized/statusnet/"+statusnet.hostname),
+                     site.url("/authorized/statusnet/"+statusnet.hostname),
                      "HMAC-SHA1",
                      null, // nonce size; use default
-                     {"User-Agent": "pump2status.net/0.1.0"});
+                     {"User-Agent": site.userAgent()});
 };
 
 // Map of hostname => {client_id: ..., client_secret: ...}
