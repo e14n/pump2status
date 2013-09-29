@@ -135,7 +135,7 @@ app.post('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.saveSe
 
 app.log.info("Initializing updater");
 
-app.updater = new Updater({log: app.log});
+app.updater = new Updater({log: app.log, site: app.site});
 
 // Start the app
 

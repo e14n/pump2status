@@ -169,7 +169,7 @@ StatusNetUser.prototype.beFound = function(callback) {
     ], callback);
 };
 
-StatusNetUser.prototype.updateFollowing = function(callback) {
+StatusNetUser.prototype.updateFollowing = function(site, callback) {
 
     var snu = this,
         sn,
@@ -221,7 +221,7 @@ StatusNetUser.prototype.updateFollowing = function(callback) {
             };
 
             sn = results;
-            oa = sn.getOAuth();
+            oa = sn.getOAuth(site);
 
             getPage(1, callback);
         }
@@ -257,6 +257,14 @@ StatusNetUser.prototype.findFriends = function(callback) {
             User.readArray(ids, callback);
         }
     ], callback);
+};
+
+StatusNetUser.prototype.associate = function(user, callback) {
+
+    var snu = this;
+
+    Shadow.create({statusnet: snu.id, pumpio: user.id}, callback);
+
 };
 
 module.exports = StatusNetUser;

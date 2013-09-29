@@ -18,6 +18,7 @@
 
 var async = require("async"),
     _ = require("underscore"),
+    Shadow = require("../models/shadow"),
     StatusNet = require("../models/statusnet"),
     StatusNetUser = require("../models/statusnetuser"),
     PumpIOClientApp = require("pump.io-client-app"),
@@ -109,13 +110,13 @@ exports.authorizedStatusNet = function(req, res, next) {
         },
         function(results, callback) {
             snuser = results;
-            user.associate(snuser, callback);
+            Shadow.create({statusnet: snuser.id, pumpio: user.id}, callback);
         },
-        function(callback) {
+        function(shadow, callback) {
             snuser.beFound(callback);
         },
         function(callback) {
-            snuser.updateFollowing(callback);
+            snuser.updateFollowing(req.site, callback);
         }
     ], function(err) {
         if (err) {
