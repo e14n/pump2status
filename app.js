@@ -80,7 +80,7 @@ PumpIOClientApp.User.prototype.afterGet = function(callback) {
             Shadow.search({pumpio: user.id}, callback);
         },
         function(shadows, callback) {
-            StatusNetUser.readAll(_.pluck(shadows, "statusnet"), callback);
+            StatusNetUser.readArray(_.pluck(shadows, "statusnet"), callback);
         }
     ], function(err, statusnetusers) {
         if (err) {
