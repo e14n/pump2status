@@ -157,7 +157,7 @@ StatusNetUser.prototype.beFound = function(callback) {
                                                User.get(id, callback);
                                            },
                                            function(waiter, callback) {
-                                               waiter.follow({objectType: "person", id: user.id}, callback);
+                                               waiter.postActivity({verb: "follow", object: {objectType: "person", id: user.id}}, callback);
                                            }
                                        ], callback);
                                    },

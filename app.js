@@ -149,5 +149,6 @@ app.run(function(err) {
     } else {
         console.log("Express server listening on address %s port %d", config.address, config.port);
         app.updater.start();
+        app.forwarder.start();
     }
 });    
