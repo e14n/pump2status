@@ -30,6 +30,7 @@ var fs = require("fs"),
     Shadow = require("./models/shadow"),
     Edge = require("./models/edge"),
     Updater = require("./lib/updater"),
+    Forwarder = require("./lib/forwarder"),
     config,
     defaults = {
         name: "Pump2Status",
@@ -136,6 +137,7 @@ app.post('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.saveSe
 app.log.info("Initializing updater");
 
 app.updater = new Updater({log: app.log, site: app.site});
+app.forwarder = new Forwarder({log: app.log, site: app.site});
 
 // Start the app
 

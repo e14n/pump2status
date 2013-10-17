@@ -8,6 +8,7 @@
         "databank": "0.19.x",
         "oauth": "0.9.x",
         "async": "0.2.x",
-        "node-uuid": "1.4.x"
+        "node-uuid": "1.4.x",
+        "validator": "1.5.x"
     }
 }
