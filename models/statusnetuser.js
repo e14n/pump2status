@@ -265,13 +265,14 @@ StatusNetUser.prototype.associate = function(user, callback) {
 
 };
 
-StatusNetUser.prototype.getNickname = function(user, callback) {
-    var parts;
+StatusNetUser.prototype.getNickname = function(callback) {
+    var snuser = this,
+        parts;
 
-    if (!_.isString(user.id)) {
+    if (!_.isString(snuser.id)) {
         return null;
     } else {
-        parts = user.id.split('@');
+        parts = snuser.id.split('@');
         return parts[0];
     }
 };
