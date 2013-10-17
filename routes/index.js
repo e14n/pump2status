@@ -169,7 +169,7 @@ exports.saveFriends = function(req, res, next) {
             async.forEachLimit(chosen,
                                10,
                                function(account, callback) {
-                                   user.follow(account, callback);
+                                   user.follow({objectType: "person", id: account.id}, callback);
                                },
                                callback);
         }
