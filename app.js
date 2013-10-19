@@ -35,6 +35,8 @@ var fs = require("fs"),
     defaults = {
         name: "Pump2Status",
         description: "Find your StatusNet friends on pump.io.",
+        forwardInterval: 15 * 60 * 1000,
+        updateInterval: 12 * 60 * 60 * 1000,
         params: {},
         views: path.join(__dirname, "views"),
         static: path.join(__dirname, "public")
@@ -136,8 +138,8 @@ app.post('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.saveSe
 
 app.log.info("Initializing updater");
 
-app.updater = new Updater({log: app.log, site: app.site});
-app.forwarder = new Forwarder({log: app.log, site: app.site});
+app.updater = new Updater({log: app.log, site: app.site, interval: config.updateInterval});
+app.forwarder = new Forwarder({log: app.log, site: app.site, interval: config.forwardInterval});
 
 // Start the app
 
