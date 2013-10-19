@@ -10,5 +10,9 @@
         "async": "0.2.x",
         "node-uuid": "1.4.x",
         "validator": "1.5.x"
+    },
+    "devDependencies": {
+        "vows": "0.7.x",
+        "xml2js": "0.1.x"
     }
 }
