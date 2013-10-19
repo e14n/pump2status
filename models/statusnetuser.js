@@ -23,10 +23,9 @@ var _ = require("underscore"),
     StatusNet = require("./statusnet"),
     Shadow = require("./shadow"),
     Edge = require("./edge"),
+    AtomActivity = require("../lib/atomactivity"),
     PumpIOClientApp = require("pump.io-client-app"),
-    validator = require("validator"),
-    User = PumpIOClientApp.User,
-    sanitize = validator.sanitize;
+    User = PumpIOClientApp.User;
 
 var StatusNetUser = DatabankObject.subClass("statusnetuser");
 
@@ -288,134 +287,14 @@ StatusNetUser.prototype.postActivity = function(activity, site, callback) {
         function(sn, callback) {
             var oa = sn.getOAuth(site),
                 nickname = snu.getNickname(),
-                entry = activityAsEntry(activity),
+                entry = new AtomActivity(activity),
                 url = 'http://'+snu.hostname+'/api/statuses/'+nickname+'.atom';
 
-            oa.post(url, snu.token, snu.secret, entry, "application/atom+xml", callback);
+            oa.post(url, snu.token, snu.secret, entry.toString(), "application/atom+xml", callback);
         }
     ], function(err, body, response) {
         callback(err);
     });
-};
-
-var activityAsEntry = function(res, user, item) {
-
-    if (item.verb == "post") {
-        activityAsImpliedEntry(res, user, item);
-    } else {
-        activityAsFullEntry(res, user, item);
-    }
-};
-
-var activityAsImpliedEntry = function(res, user, item) {
-    res.write('<?xml version="1.0" encoding="utf-8"?>\n');
-    res.write('<entry xmlns="http://www.w3.org/2005/Atom" xmlns:activity="http://activitystrea.ms/spec/1.0/">\n');
-
-    // Don't do the entry tag
-
-    activityObject(res, user, item.object, null);
-
-    res.write('</entry>');
-};
-
-var activityObject = function(res, user, obj, tag) {
-
-    var stripTags = function(str) {
-            return str.replace(/<(?:.|\n)*?>/gm, '');
-        };
-
-    if (tag) {
-        res.write('<'+tag+'>\n');
-    }
-
-    if (tag == 'author') {
-        res.write('<uri>'+obj.id+'</uri>\n');
-    } else {
-        res.write('<id>'+obj.id+'</id>\n');
-    }
-
-    if (tag == 'author') {
-        res.write('<name>'+obj.displayName+'</name>\n');
-    } else {
-        res.write('<title>'+((obj.displayName) ? obj.displayName : '')+'</title>\n');
-    }
-
-    if (obj.published) {
-        res.write('<published>'+obj.published+'</published>\n');
-    }
-
-    if (obj.updated) {
-        res.write('<updated>'+obj.updated+'</updated>\n');
-    }
-
-    res.write('<activity:object-type>'+obj.objectType+'</activity:object-type>\n');
-
-    if (obj.summary) {
-        res.write('<summary>'+stripTags(sanitize(obj.summary).entityDecode())+'</summary>\n');
-    }
-
-    if (obj.content) {
-        res.write('<content type="html">'+sanitize(obj.content).escape()+'</content>\n');
-    }
-
-    if (obj.image) {
-        res.write('<link rel="preview" href="'+obj.image.url+'" />\n');
-    }
-
-    if (obj.url) {
-        res.write('<link rel="alternate" type="text/html" href="'+obj.url+'" />\n');
-    }
-
-    // XXX: stream
-    // XXX: fullImage
-
-    if (tag) {
-        res.write('</'+tag+'>\n');
-    }
-};
-
-var activityAsFullEntry = function(res, user, item) {
-
-    var stripTags = function(str) {
-            return str.replace(/<(?:.|\n)*?>/gm, '');
-        };
-
-    res.write('<?xml version="1.0" encoding="utf-8"?>\n');
-    res.write('<entry xmlns="http://www.w3.org/2005/Atom" xmlns:activity="http://activitystrea.ms/spec/1.0/">\n');
-
-    res.write('<id>'+item.id+'</id>\n');
-
-    res.write('<published>'+item.published+'</published>\n');
-
-    res.write('<title>'+((item.displayName) ? item.displayName : '')+'</title>\n');
-
-    res.write('<activity:verb>'+item.verb+'</activity:verb>\n');
-
-    if (item.summary) {
-        res.write('<summary>'+stripTags(sanitize(item.summary).entityDecode())+'</summary>\n');
-    }
-
-    if (item.content) {
-        res.write('<content type="html">'+sanitize(item.content).escape()+'</content>\n');
-    }
-
-    if (item.object) {
-        activityObject(res, user, item.object, 'activity:object');
-    }
-
-    if (item.target) {
-        activityObject(res, user, item.object, 'activity:target');
-    }
-
-    if (item.image) {
-        res.write('<link rel="preview" href="'+item.image.url+'" />\n');
-    }
-
-    if (item.url) {
-        res.write('<link rel="alternate" type="text/html" href="'+item.url+'" />\n');
-    }
-
-    res.write('</entry>\n');
 };
 
 module.exports = StatusNetUser;
