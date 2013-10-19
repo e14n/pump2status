@@ -288,7 +288,7 @@ StatusNetUser.prototype.postActivity = function(activity, site, callback) {
             var oa = sn.getOAuth(site),
                 nickname = snu.getNickname(),
                 entry = new AtomActivity(activity),
-                url = 'http://'+snu.hostname+'/api/statuses/'+nickname+'.atom';
+                url = 'http://'+snu.hostname+'/api/statuses/user_timeline/'+nickname+'.atom';
 
             oa.post(url, snu.token, snu.secret, entry.toString(), "application/atom+xml", callback);
         }
