@@ -54,8 +54,8 @@ if (!config.params.schema) {
     config.params.schema = {};
 }
 
-ForeignUser = require("./models/" + config.foreign + "user");
-ForeignHost = require("./models/" + config.foreign);
+ForeignHost = require("./models/" + config.foreign)(config);
+ForeignUser = require("./models/" + config.foreign + "user")(config, ForeignHost);
 
 // Now, our stuff
 
