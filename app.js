@@ -25,8 +25,6 @@ var fs = require("fs"),
     Databank = databank.Databank,
     DatabankObject = databank.DatabankObject,
     PumpIOClientApp = require("pump.io-client-app"),
-    StatusNetUser = require("./models/statusnetuser"),
-    StatusNet = require("./models/statusnet"),
     Shadow = require("./models/shadow"),
     Edge = require("./models/edge"),
     Updater = require("./lib/updater"),
@@ -39,12 +37,11 @@ var fs = require("fs"),
         updateInterval: 12 * 60 * 60 * 1000,
         params: {},
         views: path.join(__dirname, "views"),
-        static: path.join(__dirname, "public")
+        static: path.join(__dirname, "public"),
+        foreign: "statusnet"
     },
-    userAuth = PumpIOClientApp.userAuth,
-    userOptional = PumpIOClientApp.userOptional,
-    userRequired = PumpIOClientApp.userRequired,
-    noUser = PumpIOClientApp.noUser;
+    ForeignUser,
+    ForeignHost;
 
 if (fs.existsSync("/etc/pump2status.json")) {
     config = _.defaults(JSON.parse(fs.readFileSync("/etc/pump2status.json")),
@@ -57,9 +54,12 @@ if (!config.params.schema) {
     config.params.schema = {};
 }
 
+ForeignUser = require("./models/" + config.foreign + "user");
+ForeignHost = require("./models/" + config.foreign);
+
 // Now, our stuff
 
-_.each([StatusNetUser, StatusNet, Shadow, Edge], function(Cls) {
+_.each([ForeignUser, ForeignHost, Shadow, Edge], function(Cls) {
     config.params.schema[Cls.type] = Cls.schema;
 });
 
@@ -83,7 +83,7 @@ PumpIOClientApp.User.prototype.afterGet = function(callback) {
             Shadow.search({pumpio: user.id}, callback);
         },
         function(shadows, callback) {
-            StatusNetUser.readArray(_.pluck(shadows, "statusnet"), callback);
+            ForeignUser.readArray(_.pluck(shadows, "statusnet"), callback);
         }
     ], function(err, statusnetusers) {
         if (err) {
@@ -98,48 +98,34 @@ PumpIOClientApp.User.prototype.afterGet = function(callback) {
 // Our params
 
 app.param("snuid", function(req, res, next, snuid) {
-    StatusNetUser.get(snuid, function(err, snuser) {
+    ForeignUser.get(snuid, function(err, fuser) {
         if (err) {
             next(err);
         } else {
-            req.snuser = snuser;
+            req.fuser = fuser;
             next();
         }
     });
 });
 
-var userIsSnuser = function(req, res, next) {
-    
-    Shadow.get(req.snuser.id, function(err, shadow) {
-        if (err) {
-            next(err);
-        } else if (shadow.pumpio != req.user.id) {
-            next(new Error("Must be same user"));
-        } else {
-            next();
-        }
-    });
-};
-
-// Routes
-
-app.log.info("Initializing routes");
-
-app.get('/add-account', userAuth, userRequired, routes.addAccount);
-app.post('/add-account', userAuth, userRequired, routes.handleAddAccount);
-app.get('/authorized/statusnet/:hostname', userAuth, userRequired, routes.authorizedStatusNet);
-app.get('/find-friends/:snuid', userAuth, userRequired, userIsSnuser, routes.findFriends);
-app.post('/find-friends/:snuid', userAuth, userRequired, userIsSnuser, routes.saveFriends);
-app.get('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.settings);
-app.post('/settings/:snuid', userAuth, userRequired, userIsSnuser, routes.saveSettings);
+routes.addRoutes(app, {foreign: config.foreign, ForeignUser: ForeignUser, ForeignHost: ForeignHost});
 
 // updater -- keeps the world up-to-date
 // XXX: move to master process when clustering
 
 app.log.info("Initializing updater");
 
-app.updater = new Updater({log: app.log, site: app.site, interval: config.updateInterval});
-app.forwarder = new Forwarder({log: app.log, site: app.site, interval: config.forwardInterval});
+app.updater = new Updater({log: app.log,
+                           site: app.site,
+                           interval: config.updateInterval,
+                           ForeignUser: ForeignUser,
+                           ForeignHost: ForeignHost});
+
+app.forwarder = new Forwarder({log: app.log,
+                               site: app.site,
+                               interval: config.forwardInterval,
+                               ForeignUser: ForeignUser,
+                               ForeignHost: ForeignHost});
 
 // Start the app
 
