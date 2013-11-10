@@ -282,8 +282,6 @@ module.exports = function(config, Twitter) {
                     status = base.substr(0, 140 - (link.length + 2)) + "… " + link;
                 }
 
-                console.log(status);
-
                 return status;
             },
             params = {status: toStatus(activity)};
