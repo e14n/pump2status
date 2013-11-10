@@ -5,14 +5,14 @@
     </div>
 <% } %>
 
-<h1>Settings for <%= snuser.id %></h1>
+<h1>Settings for <%= fuser.id %></h1>
 
 <form id="settings" method="post">
 
   <fieldset>
 
     <label class="checkbox">
-      <input type="checkbox" name="autopost" <% if (snuser.autopost) { %>checked="checked"<% } %> value="on">
+      <input type="checkbox" name="autopost" <% if (fuser.autopost) { %>checked="checked"<% } %> value="on">
       Post pump network activities to my <%= config.foreignName %> site
     </label>
 

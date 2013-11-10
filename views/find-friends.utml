@@ -1,10 +1,10 @@
 <h1>Choose friends to follow</h1>
 
-<p>These are the pump.io accounts of friends of <%- snuser.id %>.</p>
+<p>These are the pump.io accounts of friends of <%- fuser.id %>.</p>
 
 <div class="span12">
 
-<form action="/find-friends/<%- snuser.id %>" method="post">
+<form action="/find-friends/<%- fuser.id %>" method="post">
 
   <label class="checkbox">
     <input type="checkbox" id="select-all" name="select-all" onClick="if (this.checked) { $('.select').prop('checked', this.checked); }"> Select all
