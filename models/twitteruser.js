@@ -16,6 +16,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require("set-immediate");
+
 var _ = require("underscore"),
     async = require("async"),
     urlparse = require("url").parse,
@@ -24,20 +26,25 @@ var _ = require("underscore"),
     Edge = require("./edge"),
     AtomActivity = require("../lib/atomactivity"),
     PumpIOClientApp = require("pump.io-client-app"),
-    User = PumpIOClientApp.User;
+    Twitter = require("./twitter"),
+    User = PumpIOClientApp.User,
+    validator = require("validator"),
+    sanitize = validator.sanitize;
 
 module.exports = function(config, Twitter) {
 
-    var TwitterUser = DatabankObject.subClass("twitteruser");
+    var TwitterUser = DatabankObject.subClass("twitteruser"),
+        hostname = "twitter.com";
 
     TwitterUser.schema = {
         "twitteruser": {
             pkey: "id",
-            fields: ["name",
+            fields: ["screen_name",
+                     "id_str",
+                     "name",
                      "avatar",
                      "token",
                      "secret",
-                     "friends",
                      "autopost",
                      "created",
                      "updated"]
@@ -45,10 +52,8 @@ module.exports = function(config, Twitter) {
     };
 
     TwitterUser.id = function(person) {
-        var hostname = TwitterUser.hostname(person);
-
-        if (hostname && person.screen_name && person.screen_name.length > 0) {
-            return person.screen_name + "@" + hostname;
+        if (person.id_str && person.id_str.length > 0) {
+            return person.id_str + "@" + hostname;
         } else {
             return null;
         }
@@ -58,13 +63,6 @@ module.exports = function(config, Twitter) {
 
         var tu = new TwitterUser();
 
-        tu.hostname  = TwitterUser.hostname(person);
-
-        if (!tu.hostname) {
-            callback(new Error("No hostname"), null);
-            return;
-        }
-
         tu.id = TwitterUser.id(person);
 
         if (!tu.id) {
@@ -72,25 +70,25 @@ module.exports = function(config, Twitter) {
             return;
         }
 
-        tu.name   = person.name;
-        tu.avatar = person.profile_image_url;
+        tu.screen_name = person.screen_name;
+        tu.id_str      = person.id_str;
+        tu.name        = person.name;
+        tu.avatar      = person.profile_image_url;
 
         tu.token  = token;
         tu.secret = secret;
+
+        tu.autopost = false;
 
         tu.save(callback);
     };
 
     TwitterUser.getHostname = function(id) {
-        var parts = id.split("@"),
-            hostname = parts[1].toLowerCase();
-
         return hostname;
     };
 
     TwitterUser.prototype.getHost = function(callback) {
-        var tu = this;
-        Twitter.get(tu.hostname, callback);
+        return Twitter;
     };
 
     TwitterUser.prototype.getUser = function(callback) {
@@ -151,60 +149,69 @@ module.exports = function(config, Twitter) {
     TwitterUser.prototype.updateFollowing = function(site, callback) {
 
         var tu = this,
-            sn,
-            oa,
             addEdge = function(id, callback) {
-                var edge = new Edge({from: tu.id, to: id});
-                edge.save(callback);
+                Edge.create({from: tu.id, to: id}, callback);
             },
-            q = async.queue(addEdge, 25);
+            deleteEdge = function(id, callback) {
+                var bank = Edge.bank();
+                bank.del(Edge.type, Edge.key(tu.id, id), callback);
+            };
 
         async.waterfall([
             function(callback) {
-                tu.getHost(callback);
+                async.parallel([
+                    function(callback) {
+                        var following = "https://api.twitter.com/1.1/friends/ids.json?cursor=-1&user_id="+tu.id_str,
+                            oa = Twitter.getOAuth(site);
+                    
+                        // Get the current following list (up to 5000!) from Twitter
+                        // XXX: Handle users following more than 5000 others
+
+                        oa.get(following, tu.token, tu.secret, function(err, doc, resp) {
+                            var results;
+                            if (err) {
+                                callback(err, null);
+                            } else {
+                                try {
+                                    results = JSON.parse(doc);
+                                } catch (e) {
+                                    callback(e, null);
+                                    return;
+                                }
+                            }
+                            callback(null, results.ids);
+                        });
+                    },
+                    function(callback) {
+                        // Get the edges we know about from the database
+                        Edge.search({from: tu.id}, callback);
+                    }
+                ], callback);
             },
             function(results, callback) {
+                var ids = results[0],
+                    edges = results[1],
+                    known = _.pluck(edges, "to"),
+                    current = _.map(ids, function(id) { return id + "@twitter.com"; }),
+                    toAdd = _.difference(current, known),
+                    toDel = _.difference(known, current);
 
-                var getPage = function(i, callback) {
+                // XXX: autofollow
 
-                    async.waterfall([
-                        function(callback) {
-                            oa.get(tu.following + "?page=" + i, tu.token, tu.secret, callback);
-                        },
-                        function(doc, resp, callback) {
-                            var following, ids;
-
-                            try {
-                                following = JSON.parse(doc);
-                            } catch (e) {
-                                callback(e);
-                                return;
-                            }
-
-                            // Get valid-looking IDs
-
-                            ids = _.compact(_.map(following, function(person) { return TwitterUser.id(person); }));
-
-                            q.push(ids);
-                            callback(null, following.length);
-                        }
-                    ], function(err, len) {
-                        if (err) {
-                            callback(err);
-                        } else if (len < 100) {
-                            callback(null);
-                        } else {
-                            getPage(i+1, callback);
-                        }
-                    });
-                };
-
-                sn = results;
-                oa = sn.getOAuth(site);
-
-                getPage(1, callback);
+                async.parallel([
+                    function(callback) {
+                        // Add new ones we haven't seen before
+                        async.eachLimit(toAdd, 16, addEdge, callback);
+                    },
+                    function(callback) {
+                        // Remove old ones that are no longer current
+                        async.eachLimit(toDel, 16, deleteEdge, callback);
+                    }
+                ], callback);
             }
-        ], callback);
+        ], function(err) {
+            callback(err);
+        });
     };
 
     // XXX: get already-following info
@@ -239,42 +246,46 @@ module.exports = function(config, Twitter) {
     };
 
     TwitterUser.prototype.associate = function(user, callback) {
-
         var tu = this;
-        
         Shadow.create({twitter: tu.id, pumpio: user.id}, callback);
-
     };
 
     TwitterUser.prototype.getNickname = function(callback) {
         var tuser = this,
             parts;
 
-        if (!_.isString(tuser.id)) {
-            return null;
-        } else {
-            parts = tuser.id.split('@');
-            return parts[0];
-        }
+        setImmediate(function() {
+            callback(null, tuser.screen_name);
+        });
     };
+
+    // XXX: forward non-public stuff to followers iff user has a private account
+    // XXX: forward public images
 
     TwitterUser.prototype.postActivity = function(activity, site, callback) {
 
-        var tu = this;
-
-        async.waterfall([
-            function(callback) {
-                tu.getHost(callback);
+        var tu = this,
+            oa = Twitter.getOAuth(site),
+            url = 'https://api.twitter.com/1.1/statuses/update.json',
+            stripTags = function(str) {
+                return str.replace(/<(?:.|\n)*?>/gm, '');
             },
-            function(sn, callback) {
-                var oa = sn.getOAuth(site),
-                    nickname = tu.getNickname(),
-                    entry = new AtomActivity(activity),
-                    url = 'http://'+tu.hostname+'/api/statuses/user_timeline/'+nickname+'.atom';
+            toStatus = function(activity) {
+                var content = activity.object.content,
+                    link = activity.object.url,
+                    base = stripTags(sanitize(content).entityDecode());
 
-                oa.post(url, tu.token, tu.secret, entry.toString(), "application/atom+xml", callback);
-            }
-        ], function(err, body, response) {
+                if (base.length <= 140) {
+                    return base;
+                } else {
+                    return base.substr(0, 125) + "… " + link;
+                }
+            },
+            params = {status: toStatus(activity)};
+
+        oa.post(url, tu.token, tu.secret, params, function(err, doc, resp) {
+            // XXX: stop trying to post if OAuth error
+            // XXX: retry on transient failures
             callback(err);
         });
     };
