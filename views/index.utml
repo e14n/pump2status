@@ -4,7 +4,7 @@
 
       <div class="span6">
 
-        <h1>Pump2Status</h1>
+        <h1><%= site.name %></h1>
 
         <p>This service lets you link your pump.io account with your StatusNet account(s).</p>
 

@@ -1,4 +1,4 @@
-<p><b>Pump2Status</b> is a bridge to StatusNet sites.</p>
+<p><b><%= site.name %></b> is a bridge to StatusNet sites.</p>
 
 <p>It lets you connect your pump.io account with your StatusNet account, and send your pump.io activities out through StatusNet.</p>
 
