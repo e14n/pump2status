@@ -1,6 +1,6 @@
 {
     "name": "pump2status",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "dependencies": {
         "pump.io-client-app": "0.6.x",
         "underscore": "1.5.x",
@@ -15,5 +15,9 @@
     "devDependencies": {
         "vows": "0.7.x",
         "xml2js": "0.1.x"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/e14n/pump2status.git"
     }
 }
