@@ -1,8 +1,8 @@
-<p><b><%= site.name %></b> is a bridge to StatusNet sites.</p>
+<p><b><%= site.name %></b> is a bridge to <%= config.foreignName %> sites.</p>
 
-<p>It lets you connect your pump.io account with your StatusNet account, and send your pump.io activities out through StatusNet.</p>
+<p>It lets you connect your pump.io account with your <%= config.foreignName %> account, and send your pump.io activities out through StatusNet.</p>
 
-<p>It also lets you find your friends from StatusNet who are already on the pump.io network, and follow them there, too.</p>
+<p>It also lets you find your friends from <%= config.foreignName %> who are already on the pump.io network, and follow them there, too.</p>
 
 <p>Registering on this service lets your friends find you, too.</p>
 

@@ -13,7 +13,7 @@
 
     <label class="checkbox">
       <input type="checkbox" name="autopost" <% if (snuser.autopost) { %>checked="checked"<% } %> value="on">
-      Post pump network activities to my StatusNet site
+      Post pump network activities to my <%= config.foreignName %> site
     </label>
 
   </fieldset>

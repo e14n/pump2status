@@ -19,4 +19,4 @@
 
 <% } %>
 
-<p><a href="/add-account" class="add-account">Link a StatusNet account</a></p>
+<p><a href="/add-account" class="add-account">Link a <%= config.foreignName %> account</a></p>

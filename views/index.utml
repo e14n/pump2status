@@ -6,7 +6,7 @@
 
         <h1><%= site.name %></h1>
 
-        <p>This service lets you link your pump.io account with your StatusNet account(s).</p>
+        <p>This service lets you link your pump.io account with your <%= config.foreignName %> account(s).</p>
 
         <p>It helps you find your friends on the pump network.</p>
 

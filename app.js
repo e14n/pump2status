@@ -38,7 +38,8 @@ var fs = require("fs"),
         params: {},
         views: path.join(__dirname, "views"),
         static: path.join(__dirname, "public"),
-        foreign: "statusnet"
+        foreign: "statusnet",
+        foreignName: null
     },
     ForeignUser,
     ForeignHost;
@@ -48,6 +49,10 @@ if (fs.existsSync("/etc/pump2status.json")) {
                         defaults);
 } else {
     config = defaults;
+}
+
+if (!config.foreignName) {
+    config.foreignName = config.foreign.substring(0,1).toUpperCase() + config.foreign.substring(1);
 }
 
 if (!config.params.schema) {
