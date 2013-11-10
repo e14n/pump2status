@@ -65,7 +65,10 @@ ForeignUser = require("./models/" + config.foreign + "user")(config, ForeignHost
 // Now, our stuff
 
 _.each([ForeignUser, ForeignHost, Shadow, Edge], function(Cls) {
-    config.params.schema[Cls.type] = Cls.schema;
+    // some foreign classes may not need a schema
+    if (Cls.schema) {
+        config.params.schema[Cls.type] = Cls.schema;
+    }
 });
 
 // sets up the config
