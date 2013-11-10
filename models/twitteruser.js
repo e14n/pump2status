@@ -273,13 +273,18 @@ module.exports = function(config, Twitter) {
             toStatus = function(activity) {
                 var content = activity.object.content,
                     link = activity.object.url,
-                    base = stripTags(sanitize(content).entityDecode());
+                    base = stripTags(sanitize(content).entityDecode()),
+                    status;
 
                 if (base.length <= 140) {
-                    return base;
+                    status = base;
                 } else {
-                    return base.substr(0, 125) + "… " + link;
+                    status = base.substr(0, 140 - (link.length + 2)) + "… " + link;
                 }
+
+                console.log(status);
+
+                return status;
             },
             params = {status: toStatus(activity)};
 
