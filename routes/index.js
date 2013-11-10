@@ -44,106 +44,6 @@ var addRoutes = function(app, options) {
     var foreign = options.foreign,
         ForeignUser = options.ForeignUser,
         ForeignHost = options.ForeignHost,
-        addAccount = function(req, res) {
-            res.render('add-account', { title: "Add Account", user: req.user });
-        },
-        handleAddAccount = function(req, res, next) {
-
-            var id = req.body.webfinger,
-                hostname = ForeignUser.getHostname(id),
-                sn;
-
-            async.waterfall([
-                function(callback) {
-                    ForeignHost.ensureForeignHost(hostname, callback);
-                },
-                function(results, callback) {
-                    sn = results;
-                    sn.getRequestToken(req.site, callback);
-                }
-            ], function(err, rt) {
-                if (err) {
-                    if (err instanceof Error) {
-                        next(err);
-                    } else if (err.data) {
-                        next(new Error(err.data));
-                    }
-                } else {
-                    res.redirect(sn.authorizeURL(rt));
-                }
-            });
-        },
-        authorizedForeignHost = function(req, res, next) {
-
-            var hostname = req.params.hostname,
-                token = req.query.oauth_token,
-                verifier = req.query.oauth_verifier,
-                problem = req.query.oauth_problem,
-                user = req.user,
-                rt,
-                sn,
-                fuser,
-                access_token,
-                token_secret,
-                id,
-                object,
-                newUser = false;
-
-            if (!token) {
-                next(new Error("No token returned."));
-                return;
-            }
-
-            async.waterfall([
-                function(callback) {
-                    async.parallel([
-                        function(callback) {
-                            RequestToken.get(RequestToken.key(hostname, token), callback);
-                        },
-                        function(callback) {
-                            ForeignHost.get(hostname, callback);
-                        }
-                    ], callback);
-                },
-                function(results, callback) {
-                    rt = results[0];
-                    sn = results[1];
-                    sn.getAccessToken(req.site, rt, verifier, callback);
-                },
-                function(token, secret, extra, callback) {
-                    access_token = token;
-                    token_secret = secret;
-                    async.parallel([
-                        function(callback) {
-                            rt.del(callback);
-                        },
-                        function(callback) {
-                            sn.whoami(req.site, access_token, token_secret, callback);
-                        }
-                    ], callback);
-                },
-                function(results, callback) {
-                    object = results[1];
-                    ForeignUser.fromUser(object, access_token, token_secret, callback);
-                },
-                function(results, callback) {
-                    fuser = results;
-                    Shadow.create({statusnet: fuser.id, pumpio: user.id}, callback);
-                },
-                function(shadow, callback) {
-                    fuser.beFound(callback);
-                },
-                function(callback) {
-                    fuser.updateFollowing(req.site, callback);
-                }
-            ], function(err) {
-                if (err) {
-                    next(err);
-                } else {
-                    res.redirect("/find-friends/"+fuser.id);
-                }
-            });
-        },
         findFriends = function(req, res, next) {
 
             var fuser = req.fuser,
@@ -228,9 +128,6 @@ var addRoutes = function(app, options) {
 
     app.log.info("Initializing routes");
 
-    app.get('/add-account', userAuth, userRequired, addAccount);
-    app.post('/add-account', userAuth, userRequired, handleAddAccount);
-    app.get('/authorized/'+foreign+'/:hostname', userAuth, userRequired, authorizedForeignHost);
     app.get('/find-friends/:snuid', userAuth, userRequired, userIsFuser, findFriends);
     app.post('/find-friends/:snuid', userAuth, userRequired, userIsFuser, saveFriends);
     app.get('/settings/:snuid', userAuth, userRequired, userIsFuser, settings);

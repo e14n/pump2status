@@ -115,6 +115,12 @@ app.param("snuid", function(req, res, next, snuid) {
 
 routes.addRoutes(app, {foreign: config.foreign, ForeignUser: ForeignUser, ForeignHost: ForeignHost});
 
+// Any per-network routes
+
+var foreignRoutes = require("./routes/"+config.foreign);
+
+foreignRoutes.addRoutes(app, {foreign: config.foreign, ForeignUser: ForeignUser, ForeignHost: ForeignHost});
+
 // updater -- keeps the world up-to-date
 // XXX: move to master process when clustering
 

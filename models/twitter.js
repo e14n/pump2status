@@ -48,7 +48,7 @@ module.exports = function(config) {
                     }
                 ], callback);
             },
-            authorizeURL: function(rt, callback) {
+            authorizeURL: function(rt) {
                 var separator;
 
                 if (_.contains(authorization_endpoint, "?")) {
@@ -92,7 +92,7 @@ module.exports = function(config) {
                                  client_id,
                                  client_secret,
                                  "1.0",
-                                 site.url("/authorized/twitter/"+hostname),
+                                 site.url("/authorized-for-twitter"),
                                  "HMAC-SHA1",
                                  null, // nonce size; use default
                                  {"User-Agent": site.userAgent()});
