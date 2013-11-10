@@ -102,8 +102,8 @@ PumpIOClientApp.User.prototype.afterGet = function(callback) {
 
 // Our params
 
-app.param("snuid", function(req, res, next, snuid) {
-    ForeignUser.get(snuid, function(err, fuser) {
+app.param("fuid", function(req, res, next, fuid) {
+    ForeignUser.get(fuid, function(err, fuser) {
         if (err) {
             next(err);
         } else {

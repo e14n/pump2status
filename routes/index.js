@@ -128,10 +128,10 @@ var addRoutes = function(app, options) {
 
     app.log.info("Initializing routes");
 
-    app.get('/find-friends/:snuid', userAuth, userRequired, userIsFuser, findFriends);
-    app.post('/find-friends/:snuid', userAuth, userRequired, userIsFuser, saveFriends);
-    app.get('/settings/:snuid', userAuth, userRequired, userIsFuser, settings);
-    app.post('/settings/:snuid', userAuth, userRequired, userIsFuser, saveSettings);
+    app.get('/find-friends/:fuid', userAuth, userRequired, userIsFuser, findFriends);
+    app.post('/find-friends/:fuid', userAuth, userRequired, userIsFuser, saveFriends);
+    app.get('/settings/:fuid', userAuth, userRequired, userIsFuser, settings);
+    app.post('/settings/:fuid', userAuth, userRequired, userIsFuser, saveSettings);
 };
 
 exports.addRoutes = addRoutes;
