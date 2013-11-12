@@ -163,7 +163,7 @@ module.exports = function(config, Twitter) {
                     function(callback) {
                         var following = "https://api.twitter.com/1.1/friends/ids.json?cursor=-1&user_id="+tu.id_str,
                             oa = Twitter.getOAuth(site);
-                    
+                        
                         // Get the current following list (up to 5000!) from Twitter
                         // XXX: Handle users following more than 5000 others
 
@@ -176,10 +176,13 @@ module.exports = function(config, Twitter) {
                                     results = JSON.parse(doc);
                                 } catch (e) {
                                     callback(e, null);
-                                    return;
+                                }
+                                if (_.isObject(results) && _.isArray(results.ids)) {
+                                    callback(null, results.ids);
+                                } else {
+                                    callback(new Error("Unexpected results from Twitter: " + doc), null);
                                 }
                             }
-                            callback(null, results.ids);
                         });
                     },
                     function(callback) {
