@@ -5,6 +5,6 @@
 <form action="/add-account" method="post">
   <label><%= config.foreignName %> Webfinger ID</label>
   <input class="span6" id="webfinger" name="webfinger" size="30" type="text" placeholder="you@identi.ca"></input>
-  <span class="help-block">Enter your ID on your <%= config.foreignName %> site. It looks like an email address, with your StatusNet nickname then &quot;@&quot; then your server.</span>
+  <span class="help-block">Enter your ID on your <%= config.foreignName %> site. It looks like an email address, with your <%= config.foreignName %> nickname then &quot;@&quot; then your server.</span>
   <input type="submit" class="btn btn-primary" value="Connect">
 </form>
