@@ -277,6 +277,30 @@ module.exports = function(config, StatusNet) {
         }
     };
 
+    StatusNetUser.prototype.forwardActivity = function(activity, site, callback) {
+        var snuser = this,
+            isPublicPostNoteActivity = function(act) {
+            var recip = [];
+            _.each(["to", "cc", "bto", "bcc"], function(prop) {
+                if (_.isArray(act[prop])) {
+                    recip = recip.concat(act[prop]);
+                }
+            }); 
+            return act.verb == "post" &&
+                act.object.objectType == "note" &&
+                _.some(recip, function(rec) { 
+                    return rec.objectType == "collection" && 
+                        rec.id == "http://activityschema.org/collection/public";
+                });
+        };
+
+        if (isPublicPostNoteActivity(activity)) {
+            snuser.postActivity(activity, site, callback);
+        } else {
+            callback(null);
+        }
+    };
+
     StatusNetUser.prototype.postActivity = function(activity, site, callback) {
 
         var snu = this;

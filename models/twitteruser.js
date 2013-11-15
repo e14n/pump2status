@@ -262,6 +262,33 @@ module.exports = function(config, Twitter) {
         });
     };
 
+    TwitterUser.prototype.forwardActivity = function(activity, site, callback) {
+
+        var twuser = this,
+            isPublicActivity = function(act) {
+            var recip = [];
+            _.each(["to", "cc", "bto", "bcc"], function(prop) {
+                if (_.isArray(act[prop])) {
+                    recip = recip.concat(act[prop]);
+                }
+            }); 
+            return _.some(recip, function(rec) { 
+                    return rec.objectType == "collection" && 
+                        rec.id == "http://activityschema.org/collection/public";
+                });
+            },
+            isPostNoteActivity = function(act) {
+                return act.verb == "post" &&
+                act.object.objectType == "note";
+            };
+
+        if (isPublicActivity(activity) && isPostNoteActivity(activity)) {
+            twuser.postActivity(activity, site, callback);
+        } else {
+            callback(null);
+        }
+    };
+
     // XXX: forward non-public stuff to followers iff user has a private account
     // XXX: forward public images
 
