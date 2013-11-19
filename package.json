@@ -1,6 +1,6 @@
 {
     "name": "pump2status",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "dependencies": {
         "pump.io-client-app": "0.7.x",
         "underscore": "1.5.x",
