@@ -126,7 +126,7 @@ var addRoutes = function(app, options) {
     
     // Routes
 
-    app.log.info("Initializing routes");
+    app.log.debug("Initializing default routes");
 
     app.get('/find-friends/:fuid', userAuth, userRequired, userIsFuser, findFriends);
     app.post('/find-friends/:fuid', userAuth, userRequired, userIsFuser, saveFriends);

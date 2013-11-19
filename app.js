@@ -127,7 +127,7 @@ foreignRoutes.addRoutes(app, {foreign: config.foreign, ForeignUser: ForeignUser,
 // updater -- keeps the world up-to-date
 // XXX: move to master process when clustering
 
-app.log.info("Initializing updater");
+app.log.debug("Initializing updater");
 
 app.updater = new Updater({log: app.log,
                            site: app.site,
@@ -143,7 +143,7 @@ app.forwarder = new Forwarder({log: app.log,
 
 // Start the app
 
-app.log.info({port: config.port, address: config.address}, "Starting app listener");
+app.log.debug({port: config.port, address: config.address}, "Starting app listener");
 
 app.run(function(err) {
     if (err) {

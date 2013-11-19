@@ -105,7 +105,7 @@ var addRoutes = function(app, options) {
     
     // Routes
 
-    app.log.info("Initializing routes");
+    app.log.debug("Initializing Twitter routes");
 
     app.get('/add-account', userAuth, userRequired, addAccount);
     app.get('/authorized-for-twitter', userAuth, userRequired, authorizedForTwitter);

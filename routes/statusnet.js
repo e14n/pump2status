@@ -134,7 +134,7 @@ var addRoutes = function(app, options) {
     
     // Routes
 
-    app.log.info("Initializing routes");
+    app.log.debug("Initializing statusnet routes");
 
     app.get('/add-account', userAuth, userRequired, addAccount);
     app.post('/add-account', userAuth, userRequired, handleAddAccount);
