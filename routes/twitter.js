@@ -86,7 +86,17 @@ var addRoutes = function(app, options) {
                 },
                 function(results, callback) {
                     fuser = results;
-                    Shadow.create({statusnet: fuser.id, pumpio: user.id}, callback);
+                    Shadow.get(fuser.id, function(err, shadow) {
+                        if (err && err.name == "NoSuchThingError") {
+                            Shadow.create({statusnet: fuser.id, pumpio: user.id}, callback);
+                        } else if (err) {
+                            callback(err, null);
+                        } else if (shadow.pumpio != user.id) {
+                            callback(new Error(fuser.id + " is already linked to user " + shadow.pumpio), null);
+                        } else {
+                            callback(null, shadow);
+                        }
+                    });
                 },
                 function(shadow, callback) {
                     fuser.beFound(callback);
