@@ -107,7 +107,26 @@ module.exports = function(config, Twitter) {
     TwitterUser.prototype.beFound = function(callback) {
 
         var tu = this,
-            user;
+            user,
+            ensureFollows = function(waiter, user, callback) {
+                Edge.get(Edge.key(waiter.id, user.id), function(err, edge) {
+                    if (err && err.name == "NoSuchThingError") {
+                        waiter.postActivity({verb: "follow", object: {objectType: "person", id: user.id}}, function(err, activity) {
+                            if (err) {
+                                // XXX: log this
+                                callback(null);
+                            } else {
+                                Edge.create({from: waiter.id, to: user.id}, callback);
+                            }
+                        });
+                    } else if (err) {
+                        // XXX: log this
+                        callback(null);
+                    } else {
+                        callback(null);
+                    }
+                });
+            };
 
         async.waterfall([
             function(callback) {
@@ -136,7 +155,7 @@ module.exports = function(config, Twitter) {
                                                    User.get(id, callback);
                                                },
                                                function(waiter, callback) {
-                                                   waiter.postActivity({verb: "follow", object: {objectType: "person", id: user.id}}, callback);
+                                                   ensureFollows(waiter, user, callback);
                                                }
                                            ], callback);
                                        },
