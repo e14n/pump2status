@@ -21,7 +21,7 @@
                id="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>"
                onClick="$('#select-all').prop('checked', $('#select-all').prop('checked') && this.checked)">
         <img src="<%- (user.avatar) ? user.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- user.name %>">
-        <p><%- user.name %> <small class="muted"><%- user.visibleId() %></small></p>
+        <p><%- user.name %> <small class="muted"><%- user.id %></small></p>
       </div>
     </li>
 
