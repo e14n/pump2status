@@ -322,5 +322,9 @@ module.exports = function(config, StatusNet) {
         });
     };
 
+    StatusNetUser.prototype.visibleId = function() {
+        return this.id;
+    };
+
     return StatusNetUser;
 };

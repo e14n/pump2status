@@ -342,5 +342,9 @@ module.exports = function(config, Twitter) {
         });
     };
 
+    TwitterUser.prototype.visibleId = function() {
+        return "@" + this.screen_name;
+    };
+
     return TwitterUser;
 };
