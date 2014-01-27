@@ -192,7 +192,7 @@ module.exports = function(config, Twitter) {
                         oa.get(following, tu.token, tu.secret, function(err, doc, resp) {
                             var results;
                             if (err && err.statusCode == 401) {
-                                callback(new LinkError(this, err));
+                                callback(new LinkError(tu, err));
                             } else if (err) {
                                 callback(err);
                             } else {
@@ -342,7 +342,7 @@ module.exports = function(config, Twitter) {
 
         oa.post(url, tu.token, tu.secret, params, function(err, doc, resp) {
             if (err && err.statusCode == 401) {
-                callback(new LinkError(this, err));
+                callback(new LinkError(tu, err));
             } else {
                 callback(err);
             }
