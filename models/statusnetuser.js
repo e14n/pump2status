@@ -326,5 +326,20 @@ module.exports = function(config, StatusNet) {
         return this.id;
     };
 
+    StatusNetUser.prototype.afterDel = function(callback) {
+        var fuser = this,
+            delShadow = function(shadow, callback) {
+                shadow.del(callback);
+            };
+
+        Shadow.search({statusnet: fuser.id}, function(err, shadows) {
+            if (err) {
+                callback(err);
+            } else {
+                async.each(shadows, delShadow, callback);
+            }
+        });
+    };
+
     return StatusNetUser;
 };

@@ -18,18 +18,21 @@
 
 require("set-immediate");
 
+var urlparse = require("url").parse;
+
 var _ = require("underscore"),
     async = require("async"),
-    urlparse = require("url").parse,
+    validator = require("validator"),
+    sanitize = validator.sanitize,
     DatabankObject = require("databank").DatabankObject,
+    PumpIOClientApp = require("pump.io-client-app"),
+    User = PumpIOClientApp.User;
+
+var Twitter = require("./twitter"),
     Shadow = require("./shadow"),
     Edge = require("./edge"),
     AtomActivity = require("../lib/atomactivity"),
-    PumpIOClientApp = require("pump.io-client-app"),
-    Twitter = require("./twitter"),
-    User = PumpIOClientApp.User,
-    validator = require("validator"),
-    sanitize = validator.sanitize;
+    LinkError = require("../lib/linkerror");
 
 module.exports = function(config, Twitter) {
 
@@ -188,8 +191,10 @@ module.exports = function(config, Twitter) {
 
                         oa.get(following, tu.token, tu.secret, function(err, doc, resp) {
                             var results;
-                            if (err) {
-                                callback(err, null);
+                            if (err && err.statusCode == 401) {
+                                callback(new LinkError(this, err));
+                            } else if (err) {
+                                callback(err);
                             } else {
                                 try {
                                     results = JSON.parse(doc);
@@ -336,14 +341,31 @@ module.exports = function(config, Twitter) {
             params = {status: toStatus(activity)};
 
         oa.post(url, tu.token, tu.secret, params, function(err, doc, resp) {
-            // XXX: stop trying to post if OAuth error
-            // XXX: retry on transient failures
-            callback(err);
+            if (err && err.statusCode == 401) {
+                callback(new LinkError(this, err));
+            } else {
+                callback(err);
+            }
         });
     };
 
     TwitterUser.prototype.visibleId = function() {
         return "@" + this.screen_name;
+    };
+
+    TwitterUser.prototype.afterDel = function(callback) {
+        var fuser = this,
+            delShadow = function(shadow, callback) {
+                shadow.del(callback);
+            };
+
+        Shadow.search({statusnet: fuser.id}, function(err, shadows) {
+            if (err) {
+                callback(err);
+            } else {
+                async.each(shadows, delShadow, callback);
+            }
+        });
     };
 
     return TwitterUser;
