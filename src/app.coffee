@@ -41,8 +41,8 @@ defaults =
   forwardInterval: 15 * 60 * 1000
   updateInterval: 12 * 60 * 60 * 1000
   params: {}
-  views: path.join(__dirname, 'views')
-  static: path.join(__dirname, 'public')
+  views: path.join(__dirname, '..', 'views')
+  static: path.join(__dirname, '..', 'public')
   foreign: 'statusnet'
   foreignName: null
 
