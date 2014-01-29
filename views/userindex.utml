@@ -2,20 +2,22 @@
 
 <% if (user.shadows && user.shadows.length > 0) { %>
 
-<ul class="thumbnails">
+<div class="row">
+  <div class="col-sm-6 col-md-4">
 <% _.each(user.shadows, function(account) { %>
-    <li class="span2">
-      <div class="thumbnail">
-        <img src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" width="96" height="96" alt="<%- account.name %>">
+    <div class="thumbnail">
+      <img data-src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" alt="<%- account.name %>">
+      <div class="caption">
         <p><%- account.name %> <small class="muted"><%- account.visibleId() %></small></p>
         <p>
           <a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends">Find friends</a>
           <a href="/settings/<%- account.id %>" class="btn btn-mini settings">Settings</a>
         </p>
       </div>
-    </li>
+    </div>
 <% }); %>
-</ul>
+  </div>
+</div>
 
 <% } %>
 
