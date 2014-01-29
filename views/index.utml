@@ -1,8 +1,8 @@
-<div class="hero-unit">
+<div class="jumbotron">
 
     <div class="row">
 
-      <div class="span6">
+      <div class="col-sm-6 col-md-6">
 
         <h1><%= site.name %></h1>
 
@@ -10,17 +10,16 @@
 
         <p>It helps you find your friends on the pump network.</p>
 
-        <p><a href="/login" class="btn btn-primary">Get started &raquo;</a></p>
+        <p><a href="/login" class="btn btn-primary">Get started »</a></p>
 
       </div>
 
-      <div class="span4">
+      <div class="col-sm-4 col-md-4">
 
-        <img src="/images/water-pump.jpg" width="420" height="420" class="img-rounded">
+        <img src="/images/water-pump.jpg" class="img-rounded" height="420" width="420">
 
       </div>
 
     </div>
 
 </div>
-
