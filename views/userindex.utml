@@ -2,24 +2,26 @@
 
 <% if (user.shadows && user.shadows.length > 0) { %>
 
-<div class="row">
-  <div class="col-sm-4 col-md-2">
-<% _.each(user.shadows, function(account) { %>
-    <div class="thumbnail">
-      <img data-src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
-           src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
-           width="96"
-           height="96"
-           alt="<%- account.name %>">
-      <div class="caption">
-        <p><%- account.name %> <small class="muted"><%- account.visibleId() %></small></p>
-        <p>
-          <a href="/find-friends/<%- account.id %>" class="btn find-friends btn-default btn-xs" role="button">Find friends</a>
-          <a href="/settings/<%- account.id %>" class="btn settings btn-default btn-xs" role="button">Settings</a>
-        </p>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <% _.each(user.shadows, function(account) { %>
+      <div class="thumbnail">
+        <img data-src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
+             src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
+             width="96"
+             height="96"
+             alt="<%- account.name %>">
+        <div class="caption">
+          <p><%- account.name %> <small class="muted"><%- account.visibleId() %></small></p>
+          <p>
+            <a href="/find-friends/<%- account.id %>" class="btn find-friends btn-default btn-xs" role="button">Find friends</a>
+            <a href="/settings/<%- account.id %>" class="btn settings btn-default btn-xs" role="button">Settings</a>
+          </p>
+        </div>
       </div>
+      <% }); %>
     </div>
-<% }); %>
   </div>
 </div>
 
