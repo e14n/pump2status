@@ -11,17 +11,17 @@
 
   <fieldset>
 
-    <label class="checkbox">
-      <input type="checkbox" name="autopost" <% if (fuser.autopost) { %>checked="checked"<% } %> value="on">
+    <div class="checkbox"><label class="">
+      <input name="autopost" type="checkbox" <%= if (fuser.autopost) {%> checked="checked"<% } %> value="on">
       Post pump network activities to my <%= config.foreignName %> site
-    </label>
+    </label></div>
 
   </fieldset>
 
   <fieldset>
     <div class="actions">
-      <input type="submit" class="btn btn-primary" value="Save">
-      <a href="/" class="btn">Cancel</a>
+      <input class="btn btn-primary form-control" value="Save" type="submit">
+      <a href="/" class="btn btn-default">Cancel</a>
     </div>
   </fieldset>  
 
