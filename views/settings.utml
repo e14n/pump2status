@@ -12,7 +12,7 @@
   <fieldset>
 
     <div class="checkbox"><label class="">
-      <input name="autopost" type="checkbox" <%= if (fuser.autopost) {%> checked="checked"<% } %> value="on">
+      <input name="autopost" type="checkbox" <% if (fuser.autopost) {%> checked="checked"<% } %> value="on">
       Post pump network activities to my <%= config.foreignName %> site
     </label></div>
 
