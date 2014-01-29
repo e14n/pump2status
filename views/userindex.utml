@@ -6,7 +6,9 @@
   <div class="col-sm-6 col-md-4">
 <% _.each(user.shadows, function(account) { %>
     <div class="thumbnail">
-      <img data-src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>" alt="<%- account.name %>">
+      <img data-src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
+           src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
+           alt="<%- account.name %>">
       <div class="caption">
         <p><%- account.name %> <small class="muted"><%- account.visibleId() %></small></p>
         <p>
