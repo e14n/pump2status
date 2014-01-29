@@ -10,8 +10,8 @@
       <div class="caption">
         <p><%- account.name %> <small class="muted"><%- account.visibleId() %></small></p>
         <p>
-          <a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends">Find friends</a>
-          <a href="/settings/<%- account.id %>" class="btn btn-mini settings">Settings</a>
+          <a href="/find-friends/<%- account.id %>" class="btn btn-mini find-friends" role="button">Find friends</a>
+          <a href="/settings/<%- account.id %>" class="btn btn-mini settings" role="button">Settings</a>
         </p>
       </div>
     </div>
