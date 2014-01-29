@@ -75,6 +75,7 @@ oldAfterGet = PumpIOClientApp.User::afterGet
 
 PumpIOClientApp.User::afterGet = (callback) ->
   user = this
+  app.log.debug {user: user.id}, "Getting shadows"
   async.waterfall [
     (callback) ->
       # Call the default hook first
@@ -88,6 +89,7 @@ PumpIOClientApp.User::afterGet = (callback) ->
       callback err
     else
       user.shadows = statusnetusers
+      app.log.debug {shadows: _.pluck(user.shadows, "id")}, "Got shadows"
       callback null
 
 # Our params
