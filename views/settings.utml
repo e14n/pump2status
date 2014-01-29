@@ -19,10 +19,7 @@
   </fieldset>
 
   <fieldset>
-    <div class="actions">
-      <input class="btn btn-primary form-control" value="Save" type="submit">
-      <a href="/" class="btn btn-default">Cancel</a>
-    </div>
+    <input class="btn btn-primary" value="Save" type="submit"> <a href="/" class="btn btn-default">Cancel</a>
   </fieldset>  
 
 </form>
