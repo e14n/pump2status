@@ -16,6 +16,15 @@
         "vows": "0.7.x",
         "xml2js": "0.1.x"
     },
+    "scripts": {
+        "pretest": "coffee -c test/*-test.coffee && coffee -o lib/ -c src/*.coffee",
+        "test": "vows --spec -i test/*-test.js",
+        "posttest": "rm -f test/*-test.js lib/*.js",
+        "build": "coffee -b -c -o lib/ src/*.coffee",
+        "prepublish": "mkdir -p lib/ && coffee -b -c -o lib/ src/*.coffee",
+        "postpublish": "rm lib/*.js",
+        "clean": "rm -f lib/*.js test/*-test.js *~ lib/*~ src/*~ test/*~"
+    },
     "repository": {
         "type": "git",
         "url": "git://github.com/e14n/pump2status.git"
