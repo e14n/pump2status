@@ -4,7 +4,7 @@
   watch as new people register, and if one your friends comes in,
   we&apos;ll automatically subscribe to them for you.</p>
 
-<p>Until then, you should encourage friends to sign up at pump2status.net.</p>
+<p>Until then, you should encourage friends to sign up at <%- site.hostname %>.</p>
 
 <a href="/" class="btn">Back</a>
 
