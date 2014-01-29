@@ -71,9 +71,9 @@ app = new PumpIOClientApp(config)
 
 # Attach shadows to the user
  
-oldAfterGet = PumpIOClientApp.User::afterGet
+oldAfterGet = PumpIOClientApp.User.prototype.afterGet
 
-PumpIOClientApp.User::afterGet = (callback) ->
+PumpIOClientApp.User.prototype.afterGet = (callback) ->
   user = this
   app.log.debug {user: user.id}, "Getting shadows"
   async.waterfall [
