@@ -1,4 +1,4 @@
-# lib/linkerror.js
+# lib/linkerror.coffee
 #
 # The user has disconnected this link in the other server
 #
@@ -16,7 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Create a new object, that prototypally inherits from the Error constructor.  
+# Create a new object, that prototypally inherits from the Error constructor.
+ 
 LinkError = (fuser, wrapped) ->
   Error.captureStackTrace this, LinkError
   @name = "LinkError"

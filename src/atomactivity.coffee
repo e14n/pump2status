@@ -1,8 +1,8 @@
-# atomactivity.js
+# atomactivity.coffee
 #
 # data object representing an Activity
 #
-# Copyright 2013, E14N (https://e14n.com/)
+# Copyright 2013-2014 E14N (https://e14n.com/)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-validator = require("validator")
+
+validator = require 'validator'
+
 sanitize = validator.sanitize
 NS = "http://activitystrea.ms/schema/1.0/"
+
 AtomActivity = (act) ->
   entry = this
   canonicalize = (str) ->

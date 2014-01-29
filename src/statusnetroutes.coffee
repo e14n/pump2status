@@ -1,4 +1,4 @@
-# routes/statusnet.js
+# statusnetroutes.coffee
 #
 # Routes for logging in to a StatusNet account
 #
@@ -17,7 +17,7 @@
 # limitations under the License.
 async = require("async")
 _ = require("underscore")
-Shadow = require("../models/shadow")
+Shadow = require("./shadow")
 PumpIOClientApp = require("pump.io-client-app")
 RequestToken = PumpIOClientApp.RequestToken
 userAuth = PumpIOClientApp.userAuth

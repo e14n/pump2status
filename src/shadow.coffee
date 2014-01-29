@@ -1,4 +1,4 @@
-# shadow.js
+# shadow.coffee
 #
 # A pump.io user shadowing a StatusNet user
 #

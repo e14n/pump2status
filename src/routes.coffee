@@ -1,4 +1,4 @@
-# index.js
+# routes.coffee
 #
 # Most of the routes in the application
 #
@@ -15,9 +15,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 async = require("async")
 _ = require("underscore")
-Shadow = require("../models/shadow")
+Shadow = require("./shadow")
 PumpIOClientApp = require("pump.io-client-app")
 RequestToken = PumpIOClientApp.RequestToken
 userAuth = PumpIOClientApp.userAuth

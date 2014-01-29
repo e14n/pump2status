@@ -21,6 +21,7 @@ OAuth = require("oauth").OAuth
 PumpIOClientApp = require("pump.io-client-app")
 DatabankObject = require("databank").DatabankObject
 RequestToken = PumpIOClientApp.RequestToken
+
 module.exports = (config) ->
   client_id = config.client_id
   client_secret = config.client_secret

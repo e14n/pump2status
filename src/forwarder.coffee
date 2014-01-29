@@ -15,14 +15,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 _ = require("underscore")
 async = require("async")
 PumpIOClientApp = require("pump.io-client-app")
 User = PumpIOClientApp.User
 Host = PumpIOClientApp.Host
-Shadow = require("../models/shadow")
-Edge = require("../models/edge")
+Shadow = require("./shadow")
+Edge = require("./edge")
 LinkError = require("./linkerror")
+
 UnavailableFeedError = (url, wrapped) ->
   Error.captureStackTrace this, UnavailableFeedError
   @url = url

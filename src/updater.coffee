@@ -15,12 +15,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 _ = require("underscore")
 async = require("async")
 PumpIOClientApp = require("pump.io-client-app")
 User = PumpIOClientApp.User
 Host = PumpIOClientApp.Host
 LinkError = require("./linkerror")
+
 ignore = (err) ->
 
 Updater = (options) ->
@@ -76,6 +78,7 @@ Updater = (options) ->
     return
 
   q = async.queue(updateFollowing, 25)
+  
   @start = ->
     
     # Do this every 12 hours

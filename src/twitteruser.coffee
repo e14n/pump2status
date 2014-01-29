@@ -15,6 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 require "set-immediate"
 urlparse = require("url").parse
 _ = require("underscore")
@@ -27,8 +28,8 @@ User = PumpIOClientApp.User
 Twitter = require("./twitter")
 Shadow = require("./shadow")
 Edge = require("./edge")
-AtomActivity = require("../lib/atomactivity")
-LinkError = require("../lib/linkerror")
+LinkError = require("./linkerror")
+
 module.exports = (config, Twitter) ->
   TwitterUser = DatabankObject.subClass("twitteruser")
   hostname = "twitter.com"

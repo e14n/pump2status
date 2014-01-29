@@ -1,4 +1,4 @@
-# statusnet.js
+# statusnet.coffee
 #
 # data object representing a remote StatusNet host
 #

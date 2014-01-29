@@ -1,8 +1,8 @@
-# app.js
+# app.coffee
 #
 # pump2status entrypoint
 #
-# Copyright 2013, E14N (https://e14n.com/)
+# Copyright 2013-2014 E14N (https://e14n.com/)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,60 +15,64 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-fs = require("fs")
-path = require("path")
-async = require("async")
-_ = require("underscore")
-routes = require("./routes")
-databank = require("databank")
+ 
+fs = require 'fs'
+path = require 'path'
+
+async = require 'async'
+_ = require 'underscore'
+
+databank = require 'databank'
 Databank = databank.Databank
 DatabankObject = databank.DatabankObject
-PumpIOClientApp = require("pump.io-client-app")
-Shadow = require("./models/shadow")
-Edge = require("./models/edge")
-Updater = require("./lib/updater")
-Forwarder = require("./lib/forwarder")
+PumpIOClientApp = require 'pump.io-client-app'
+
+routes = require './routes'
+Shadow = require './shadow'
+Edge = require './edge'
+Updater = require './updater'
+Forwarder = require './forwarder'
+
 config = undefined
+
 defaults =
-  name: "Pump2Status"
-  description: "Find your StatusNet friends on pump.io."
+  name: 'Pump2Status'
+  description: 'Find your StatusNet friends on pump.io.'
   forwardInterval: 15 * 60 * 1000
   updateInterval: 12 * 60 * 60 * 1000
   params: {}
-  views: path.join(__dirname, "views")
-  static: path.join(__dirname, "public")
-  foreign: "statusnet"
+  views: path.join(__dirname, 'views')
+  static: path.join(__dirname, 'public')
+  foreign: 'statusnet'
   foreignName: null
 
 ForeignUser = undefined
 ForeignHost = undefined
-if fs.existsSync("/etc/pump2status.json")
-  config = _.defaults(JSON.parse(fs.readFileSync("/etc/pump2status.json")), defaults)
+
+if fs.existsSync('/etc/pump2status.json')
+  config = _.defaults(JSON.parse(fs.readFileSync('/etc/pump2status.json')), defaults)
 else
   config = defaults
+  
 config.foreignName = config.foreign.substring(0, 1).toUpperCase() + config.foreign.substring(1)  unless config.foreignName
 config.params.schema = {}  unless config.params.schema
-ForeignHost = require("./models/" + config.foreign)(config)
-ForeignUser = require("./models/" + config.foreign + "user")(config, ForeignHost)
+
+ForeignHost = require("./#{config.foreign}")(config)
+ForeignUser = require("./#{config.foreign}user")(config, ForeignHost)
 
 # Now, our stuff
-_.each [
-  ForeignUser
-  ForeignHost
-  Shadow
-  Edge
-], (Cls) ->
-  
+_.each [ForeignUser, ForeignHost, Shadow, Edge], (Cls) ->
   # some foreign classes may not need a schema
-  config.params.schema[Cls.type] = Cls.schema  if Cls.schema
+  config.params.schema[Cls.type] = Cls.schema if Cls.schema
   return
-
 
 # sets up the config
 app = new PumpIOClientApp(config)
 
 # Attach shadows to the user
+ 
 oldAfterGet = PumpIOClientApp.User::afterGet
+
 PumpIOClientApp.User::afterGet = (callback) ->
   user = this
   async.waterfall [
@@ -81,7 +85,7 @@ PumpIOClientApp.User::afterGet = (callback) ->
         pumpio: user.id
       , callback
     (shadows, callback) ->
-      ForeignUser.readArray _.pluck(shadows, "statusnet"), callback
+      ForeignUser.readArray _.pluck(shadows, 'statusnet'), callback
   ], (err, statusnetusers) ->
     if err
       callback err
@@ -94,7 +98,7 @@ PumpIOClientApp.User::afterGet = (callback) ->
 
 
 # Our params
-app.param "fuid", (req, res, next, fuid) ->
+app.param 'fuid', (req, res, next, fuid) ->
   ForeignUser.get fuid, (err, fuser) ->
     if err
       next err
@@ -110,18 +114,19 @@ routes.addRoutes app,
   ForeignUser: ForeignUser
   ForeignHost: ForeignHost
 
-
 # Any per-network routes
-foreignRoutes = require("./routes/" + config.foreign)
+foreignRoutes = require "./#{config.foreign}routes"
+
 foreignRoutes.addRoutes app,
   foreign: config.foreign
   ForeignUser: ForeignUser
   ForeignHost: ForeignHost
 
-
 # updater -- keeps the world up-to-date
 # XXX: move to master process when clustering
-app.log.debug "Initializing updater"
+
+app.log.debug 'Initializing updater'
+
 app.updater = new Updater(
   log: app.log
   site: app.site
@@ -129,6 +134,7 @@ app.updater = new Updater(
   ForeignUser: ForeignUser
   ForeignHost: ForeignHost
 )
+
 app.forwarder = new Forwarder(
   log: app.log
   site: app.site
@@ -141,13 +147,13 @@ app.forwarder = new Forwarder(
 app.log.debug
   port: config.port
   address: config.address
-, "Starting app listener"
+, 'Starting app listener'
+
 app.run (err) ->
   if err
     app.log.error err
   else
-    console.log "Express server listening on address %s port %d", config.address, config.port
+    console.log 'Express server listening on address %s port %d', config.address, config.port
     app.updater.start()
     app.forwarder.start()
   return
-
