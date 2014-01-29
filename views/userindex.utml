@@ -8,6 +8,8 @@
     <div class="thumbnail">
       <img data-src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
            src="<%- (account.avatar) ? account.avatar : '/images/default.png' %>"
+           width="96"
+           height="96"
            alt="<%- account.name %>">
       <div class="caption">
         <p><%- account.name %> <small class="muted"><%- account.visibleId() %></small></p>
