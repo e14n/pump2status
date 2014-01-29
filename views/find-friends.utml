@@ -11,7 +11,7 @@
   </label></div>
 
   <div class="row">
-    <% _.each(found, function(user) { 
+    <% _.each(found, function(user) { %>
        <div class="col-xs-6 col-md-3">
          <div class="thumbnail">
            <input class="pull-left select" name="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>" id="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>" onclick="$('#select-all').prop('checked', $('#select-all').prop('checked') && this.checked)" type="checkbox">
