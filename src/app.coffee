@@ -77,13 +77,10 @@ PumpIOClientApp.User::afterGet = (callback) ->
   user = this
   async.waterfall [
     (callback) ->
-      
       # Call the default hook first
       oldAfterGet.call user, callback
     (callback) ->
-      Shadow.search
-        pumpio: user.id
-      , callback
+      Shadow.search {pumpio: user.id}, callback
     (shadows, callback) ->
       ForeignUser.readArray _.pluck(shadows, 'statusnet'), callback
   ], (err, statusnetusers) ->
@@ -92,10 +89,6 @@ PumpIOClientApp.User::afterGet = (callback) ->
     else
       user.shadows = statusnetusers
       callback null
-    return
-
-  return
-
 
 # Our params
 app.param 'fuid', (req, res, next, fuid) ->
