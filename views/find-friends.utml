@@ -12,7 +12,7 @@
 
     <div class="row">
       <% var col = 0; _.each(found, function(user) { %>
-      <div class="col-xs-6 col-md-3">
+      <div class="col-xs-4 col-md-2">
         <div class="thumbnail">
           <input class="pull-left select" name="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>" id="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>" onclick="$('#select-all').prop('checked', $('#select-all').prop('checked') && this.checked)" type="checkbox">
           <img src="<%- (user.avatar) ? user.avatar : '/images/default.png' %>" alt="<%- user.name %>" height="96" width="96">
@@ -22,7 +22,7 @@
         </div>
       </div>
       <% col++;
-         if (col == 4) {
+         if (col == 6) {
             col = 0; %>
          </div>
          <div class="row">
