@@ -17,7 +17,7 @@
           <input class="pull-left select" name="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>" id="<%- user.id.toLowerCase().replace(/[\.@]/g, '_') %>" onclick="$('#select-all').prop('checked', $('#select-all').prop('checked') && this.checked)" type="checkbox">
           <img src="<%- (user.avatar) ? user.avatar : '/images/default.png' %>" alt="<%- user.name %>" height="96" width="96">
           <div class="caption">
-            <p><%- user.name %> <small class="text-muted"><%- user.id %></small></p>
+            <p><%- user.name %> <br> <small class="text-muted"><%- user.id %></small></p>
           </div>
         </div>
       </div>
