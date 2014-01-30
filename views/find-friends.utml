@@ -31,7 +31,9 @@
          }); %>
     </div>
 
+    <fieldset>
     <input class="btn btn-primary form-control" value="Follow" type="submit">
+    </fieldset>
 
   </form>
 
