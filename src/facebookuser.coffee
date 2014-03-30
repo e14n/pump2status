@@ -16,15 +16,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "set-immediate"
 urlparse = require("url").parse
-_ = require("underscore")
-async = require("async")
-validator = require("validator")
+require "set-immediate"
+
+_ = require "underscore"
+async = require "async"
+validator = require "validator"
 sanitize = validator.sanitize
 DatabankObject = require("databank").DatabankObject
-PumpIOClientApp = require("pump.io-client-app")
+PumpIOClientApp = require "pump.io-client-app"
 User = PumpIOClientApp.User
+
 Facebook = require("./facebook")
 Shadow = require("./shadow")
 Edge = require("./edge")
@@ -126,20 +128,16 @@ module.exports = (config, Facebook) ->
         fu.getUser callback
       (results, callback) ->
         user = results
-        Edge.search
-          to: fu.id
-        , callback
-      
-      # Find pump.io IDs of originators of these edges waiting for this user to join
+        Edge.search {to: fu.id}, callback
       (edges, callback) ->
-        waiters = _.pluck(edges, "from")
+        # Find pump.io IDs of originators of these edges waiting for this user to join
+        waiters = _.pluck edges, "from"
         Shadow.readArray waiters, callback
       (shadows, callback) ->
-        ids = _.pluck(shadows, "pumpio")
+        ids = _.pluck shadows, "pumpio"
         if not ids or ids.length is 0
           callback null
         else
-          
           # For each shadow, have it follow the pump.io account
           async.forEachLimit ids, 25, ((id, callback) ->
             async.waterfall [
@@ -154,18 +152,15 @@ module.exports = (config, Facebook) ->
     return
 
   FacebookUser::updateFollowing = (site, callback) ->
+    
     fu = this
+    
     addEdge = (id, callback) ->
-      Edge.create
-        from: fu.id
-        to: id
-      , callback
-      return
+      Edge.create {from: fu.id, to: id}, callback
 
     deleteEdge = (id, callback) ->
       bank = Edge.bank()
       bank.del Edge.type, Edge.key(fu.id, id), callback
-      return
 
     async.waterfall [
       (callback) ->
