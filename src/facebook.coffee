@@ -25,10 +25,6 @@ RequestToken = PumpIOClientApp.RequestToken
 module.exports = (config) ->
   client_id = config.client_id
   client_secret = config.client_secret
-  request_token_endpoint = "https://api.facebook.com/oauth/request_token"
-  access_token_endpoint = "https://api.facebook.com/oauth/access_token"
-  authorization_endpoint = "https://api.facebook.com/oauth/authorize"
-  whoami_endpoint = "https://api.facebook.com/1.1/account/verify_credentials.json"
   hostname = "facebook.com"
   Facebook =
     getRequestToken: (site, callback) ->
@@ -45,13 +41,9 @@ module.exports = (config) ->
       ], callback
       return
 
-    authorizeURL: (rt) ->
-      separator = undefined
-      if _.contains(authorization_endpoint, "?")
-        separator = "&"
-      else
-        separator = "?"
-      authorization_endpoint + separator + "oauth_token=" + rt.token
+    authorizeURL: (site) ->
+      redirect_uri = site.url "/authorized-for-facebook"
+      "https://www.facebook.com/dialog/oauth?client_id=#{client_id}&redirect_uri=#{redirect_uri}"
 
     getAccessToken: (site, rt, verifier, callback) ->
       oa = Facebook.getOAuth(site)

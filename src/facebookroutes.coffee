@@ -35,46 +35,26 @@ addRoutes = (app, options) ->
   Facebook = options.ForeignHost
   
   addAccount = (req, res, next) ->
-    
-    Facebook.getRequestToken req.site, (err, rt) ->
-      if err
-        next err
-      else
-        res.redirect Facebook.authorizeURL(rt)
-      return
-
-    return
+    site = req.site
+    res.redirect Facebook.authorizeURL(req.site)
 
   authorizedForFacebook = (req, res, next) ->
-    hostname = "facebook.com"
-    token = req.query.oauth_token
-    verifier = req.query.oauth_verifier
-    problem = req.query.oauth_problem
-    user = req.user
-    rt = undefined
-    fuser = undefined
-    access_token = undefined
-    token_secret = undefined
-    id = undefined
-    object = undefined
-    newUser = false
-    unless token
-      next new Error("No token returned.")
+
+    if req.query.error
+      next new Error "Error authenticating"
       return
+
+    req.log.info req.query, "Facebook results"
+
+    if !req.query.code
+      next new Error "No 'code' parameter returned"
+      return
+      
     async.waterfall [
       (callback) ->
-        RequestToken.get RequestToken.key(hostname, token), callback
-      (results, callback) ->
-        rt = results
-        Facebook.getAccessToken req.site, rt, verifier, callback
-      (token, secret, extra, callback) ->
-        access_token = token
-        token_secret = secret
-        async.parallel [
-          (callback) ->
-            rt.del callback
-          (callback) ->
-            Facebook.whoami req.site, access_token, token_secret, callback
+        Facebook.getAccessToken req.site, req.query.code, callback
+      (accessToken, expiry, callback) ->
+        Facebook.whoami req.site, access_token, token_secret, callback
         ], callback
       (results, callback) ->
         object = results[1]
